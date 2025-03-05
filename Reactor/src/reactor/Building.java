@@ -8,12 +8,19 @@ public class Building {
 
     Unit[][] reactor;
 
+    double[][] temperature;
+
+    Neut[][][] neutCounts;
+
     ReactorRenderer rr;
 
     ArrayList<Neut> neuts = new ArrayList<>();
 
+    ArrayList<Neut> neutsToAdd = new ArrayList<>();
+
     UnitTemplate[] uts = {
-        new UnitTemplate("F", "U", 0.02, 1, 100, Color.GREEN)
+        new UnitTemplate("F", "U", new double[] {0.05, 1, 10, 0.05}, Color.GREEN),
+        new UnitTemplate("R", "B", new double[] {1}, Color.GRAY)
     };
 
     int xsize;
@@ -23,12 +30,14 @@ public class Building {
         this.xsize = template.length;
         this.ysize = template[0].length;
         reactor = new Unit[xsize][ysize];
+        temperature = new double[xsize][ysize];
+        neutCounts = new Neut[xsize][ysize][0];
         UnitCode.building = this;
         for (int x = 0; x < xsize; x++) {
             for (int y = 0; y < ysize; y++) {
                 for (int i = 0; i < uts.length; i++) {
-                    if(uts[i].subtype().equals(template[x][i])){
-                        reactor[x][y] = new Unit(uts[i], i, x, y);
+                    if(uts[i].subtype().equals(template[x][y].substring(0, 1))){
+                        reactor[x][y] = new Unit(uts[i], Integer.parseInt(template[x][i].substring(1, 2)), x, y);
                     }
                 }
             }
@@ -45,6 +54,9 @@ public class Building {
         for (int i = 0; i < neuts.size(); i++) {
             updateNeut(neuts.get(i));
         }
+        neuts.addAll(neutsToAdd);
+        neutsToAdd.clear();
+        updateNeutCounts();
         rr.infoToDraw = new String[]{
             String.valueOf(neuts.size()),
         };
@@ -55,7 +67,9 @@ public class Building {
         n.x+=(int)n.xv;
         n.y+=(int)n.yv;
         n.lifetime--;
-        if(n.lifetime<=0)neuts.remove(n);
+        if(n.lifetime<=0){
+            neuts.remove(n);
+        }
     }
 
     public Unit getUnitAt(int x, int y){
@@ -65,40 +79,50 @@ public class Building {
         return reactor[x][y];
     }
 
-    public int getNeutCountAt(int x, int y){
+    public Neut[] getNeutCountAt(int x, int y){
         if(x<0||x>=xsize||y<0||y>=ysize){
-            return 0;
+            return new Neut[0];
         }
-        int count = 0;
-        for (int x2 = 0; x2 < xsize; x2++) {
-            for (int y2 = 0; y2 < ysize; y2++) {
+        return neutCounts[x][y];
+    }
+
+    private void updateNeutCounts(){
+        neutCounts = new Neut[xsize][ysize][0];
+        for (int x = 0; x < xsize; x++) {
+            for (int y = 0; y < ysize; y++) {
+                ArrayList<Neut> neuts2 = new ArrayList<>();
                 for (int i = 0; i < neuts.size(); i++) {
-                    if(x==(int)neuts.get(i).x&&y==(int)neuts.get(i).y){
-                        count++;
+                    if((int)neuts.get(i).x<0||(int)neuts.get(i).x>=xsize||(int)neuts.get(i).y<0||(int)neuts.get(i).y>=ysize){
+                        continue;
+                    }
+                    if((int)neuts.get(i).x==x&&(int)neuts.get(i).y==y){
+                        neuts2.add(neuts.get(i));
                     }
                 }
+                neutCounts[x][y] = neuts2.toArray(new Neut[0]);
             }
         }
-        return count;
+
     }
 
     public void spawnNeut(int x, int y, double xv, double yv, int lifetime){
-        neuts.add(new Neut(x, y, xv, yv, lifetime));
+        neutsToAdd.add(new Neut(x, y, xv, yv, lifetime));
     }
 
     public static void main(String[] args) {
         Building b = new Building(new String[][]
         {
-            {"U","U","U","U","U","U","U","U","U","U","U","U"},
-            {"U","U","U","U","U","U","U","U","U","U","U","U"},
-            {"U","U","U","U","U","U","U","U","U","U","U","U"},
-            {"U","U","U","U","U","U","U","U","U","U","U","U"},
+            {"B0","B0","B0","B0","B0","B0","B0","B0","B0","B0","B0","B0"},
+            {"B0","U0","U0","U0","U0","U0","U0","U0","U0","U0","U0","B0"},
+            {"B0","U0","U0","U0","U0","U0","U0","U0","U0","U0","U0","B0"},
+            {"B0","U0","U0","U0","U0","U0","U0","U0","U0","U0","U0","B0"},
+            {"B0","U0","U0","U0","U0","U0","U0","U0","U0","U0","U0","B0"},
+            {"B0","B0","B0","B0","B0","B0","B0","B0","B0","B0","B0","B0"},
         }
         );
         while (true) {
             long t = TimeUnit.NANOSECONDS.toMillis(System.nanoTime());
             b.frame();
-            System.out.println(b.neuts.size());
             long t2 = TimeUnit.NANOSECONDS.toMillis(System.nanoTime());
             try {Thread.sleep((int)Math.max(16-(t2-t),0));}catch(InterruptedException e){}
         }
