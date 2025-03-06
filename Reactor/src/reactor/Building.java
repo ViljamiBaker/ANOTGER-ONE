@@ -15,12 +15,14 @@ public class Building {
     ReactorRenderer rr;
 
     ArrayList<Neut> neuts = new ArrayList<>();
-
+    ArrayList<Neut> neutsToRemove = new ArrayList<>();
     ArrayList<Neut> neutsToAdd = new ArrayList<>();
 
     UnitTemplate[] uts = {
-        new UnitTemplate("F", "U", new double[] {0.05, 1, 10, 0.05}, Color.GREEN),
-        new UnitTemplate("R", "B", new double[] {1}, Color.GRAY)
+        new UnitTemplate("F", "U", new double[] {0.05, 0.1, 1000, 0.05}, Color.GREEN,false),
+        new UnitTemplate("R", "B", new double[] {1}, Color.GRAY,true),
+        new UnitTemplate("M", "W", new double[] {0.5,0.01}, Color.CYAN,false),
+        new UnitTemplate("C", "C", new double[] {0.5,0,1,500,600,0.05}, Color.ORANGE,false)
     };
 
     int xsize;
@@ -54,7 +56,9 @@ public class Building {
         for (int i = 0; i < neuts.size(); i++) {
             updateNeut(neuts.get(i));
         }
+        neuts.removeAll(neutsToRemove);
         neuts.addAll(neutsToAdd);
+        neutsToRemove.clear();
         neutsToAdd.clear();
         updateNeutCounts();
         rr.infoToDraw = new String[]{
@@ -64,17 +68,34 @@ public class Building {
     }
 
     public void updateNeut(Neut n){
-        n.x+=(int)n.xv;
-        n.y+=(int)n.yv;
+        if(!getUnitAt((int)(n.x+n.xv), (int)(n.y+n.yv)).solid){
+            n.x+=n.xv;
+            n.y+=n.yv;
+        }else{
+            Unit u = getUnitAt((int)(n.x+n.xv), (int)(n.y+n.yv));
+            if(Math.abs(n.x-u.x-0.5)>Math.abs(n.y-u.y-0.5)){
+                if(n.x-u.x-0.5<0){
+                    n.xv=Math.abs(n.xv)*-1;
+                }else{
+                    n.xv=Math.abs(n.xv)*1;
+                }
+            }else{
+                if(n.y-u.y-0.5<0){
+                    n.yv=Math.abs(n.yv)*-1;
+                }else{
+                    n.yv=Math.abs(n.yv)*1;
+                }
+            }
+        }
         n.lifetime--;
         if(n.lifetime<=0){
-            neuts.remove(n);
+            neutsToRemove.add(n);
         }
     }
 
     public Unit getUnitAt(int x, int y){
         if(x<0||x>=xsize||y<0||y>=ysize){
-            return null;
+            return new Unit(uts[0], 0, 0, 0);
         }
         return reactor[x][y];
     }
@@ -106,18 +127,23 @@ public class Building {
     }
 
     public void spawnNeut(int x, int y, double xv, double yv, int lifetime){
-        neutsToAdd.add(new Neut(x, y, xv, yv, lifetime));
+        neutsToAdd.add(new Neut(x+0.5, y+0.5, xv, yv, lifetime));
     }
 
     public static void main(String[] args) {
         Building b = new Building(new String[][]
         {
-            {"B0","B0","B0","B0","B0","B0","B0","B0","B0","B0","B0","B0"},
-            {"B0","U0","U0","U0","U0","U0","U0","U0","U0","U0","U0","B0"},
-            {"B0","U0","U0","U0","U0","U0","U0","U0","U0","U0","U0","B0"},
-            {"B0","U0","U0","U0","U0","U0","U0","U0","U0","U0","U0","B0"},
-            {"B0","U0","U0","U0","U0","U0","U0","U0","U0","U0","U0","B0"},
-            {"B0","B0","B0","B0","B0","B0","B0","B0","B0","B0","B0","B0"},
+            {"B0","B0","B0","B0","B0","B0","B0","B0","B0","B0","B0"},
+            {"B0","U0","C0","W0","C0","U0","C0","W0","C0","U0","B0"},
+            {"B0","C0","B0","C0","B0","C0","B0","C0","B0","C0","B0"},
+            {"B0","U0","C0","W0","C0","U0","C0","W0","C0","U0","B0"},
+            {"B0","C0","B0","C0","B0","C0","B0","C0","B0","C0","B0"},
+            {"B0","U0","C0","W0","C0","U0","C0","W0","C0","U0","B0"},
+            {"B0","B0","B0","B0","B0","B0","B0","B0","B0","B0","B0"},
+            //{"B0","W0","W0","W0","B0","B0","B0","B0","B0","B0","B0"},
+            //{"B0","W0","U0","W0","B0","B0","B0","B0","B0","B0","B0"},
+            //{"B0","W0","W0","W0","B0","B0","B0","B0","B0","B0","B0"},
+            //{"B0","B0","B0","B0","B0","B0","B0","B0","B0","B0","B0"},
         }
         );
         while (true) {

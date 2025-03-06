@@ -13,8 +13,8 @@ public class ReactorRenderer extends JFrame{
     public String[] infoToDraw = new String[0];
     Graphics g;
     keyListener kl;
-    int xoffset = 0;
-    int yoffset = 0;
+    double xoffset = 0;
+    double yoffset = 0;
     double zoom = 1;
     public ReactorRenderer(Building building){
         this.building = building;
@@ -39,10 +39,10 @@ public class ReactorRenderer extends JFrame{
     public void paint(Graphics g){
         try {
             if(kl.keyDown(KeyEvent.VK_W)){
-                yoffset++;
+                yoffset--;
             }
             if(kl.keyDown(KeyEvent.VK_S)){
-                yoffset--;
+                yoffset++;
             }
             if(kl.keyDown(KeyEvent.VK_A)){
                 xoffset--;
@@ -57,24 +57,44 @@ public class ReactorRenderer extends JFrame{
                 zoom*=0.99;
             }
         } catch (Exception e) {}
+        Unit u = building.getUnitAt(EXIT_ON_CLOSE, ABORT);
+        infoToDraw = new String[u.temp.length + 3];
 
+        for (int i = 0; i < infoToDraw.length; i++) {
+            switch (i) {
+                case 0:
+                    infoToDraw[i] = "A";
+                    break;
+                case 1:
+                    infoToDraw[i] = "A";
+                    break;
+                case 2:
+                    infoToDraw[i] = "A";
+                    break;
+                default:
+                    infoToDraw[i] = String.valueOf(u.temp[i-3]);
+                    break;
+            }
+        }
         BufferedImage bi = new BufferedImage(800, 800, BufferedImage.TYPE_INT_ARGB);
         Graphics bg = bi.getGraphics();
         bg.setColor(Color.WHITE);
         bg.fillRect(0,0,800,800);
         bg.setColor(Color.BLACK);
-        for(int y = 0; y < building.reactor.length; y++){
-            for(int x = 0; x < building.reactor[y].length; x++){
-                Color c = building.reactor[y][x].color;
-                bg.setColor(new Color((int)Math.min(c.getRed() + building.temperature[y][x],255.0), c.getGreen(), c.getBlue()));
-                bg.fillRect((int)((double)(x-xoffset*building.reactor.length/100.0)*(720.0/building.reactor.length)/zoom)+440,(int)((double)(y+yoffset*building.reactor.length/100.0)*(720.0/building.reactor.length)/zoom)+330,Math.max((int)(720.0/building.reactor.length/zoom),1)+1,Math.max((int)(720.0/building.reactor.length/zoom),1)+1);
+        double rectsize = (720.0/building.reactor.length)/zoom;
+        for(int x = 0; x < building.reactor.length; x++){
+            for(int y = 0; y < building.reactor[x].length; y++){
+                Color c = building.reactor[x][y].color;
+                bg.setColor(new Color((int)Math.min(c.getRed() + building.temperature[x][y],255.0), c.getGreen(), c.getBlue()));
+                bg.fillRect((int)((x-xoffset*building.reactor.length/100.0)*rectsize)+440,(int)((y-yoffset*building.reactor.length/100.0)*rectsize)+330,Math.max((int)(rectsize),1)+1,Math.max((int)(rectsize),1)+1);
             }
         }
         bg.setColor(Color.BLUE);
         for (int i = 0; i < building.neuts.size(); i++) {
-            bg.drawOval((int)((double)(building.neuts.get(i).y-xoffset*(double)building.reactor.length/100.0)*(720.0/building.reactor.length)/zoom)+440,(int)((double)(building.neuts.get(i).x+yoffset*(double)building.reactor.length/100.0)*(720.0/building.reactor.length)/zoom)+330,(int)(1/zoom*10),(int)(1/zoom*10));
+            Neut n = building.neuts.get(i);
+            bg.drawOval((int)((n.x-xoffset*building.reactor.length/100.0)*rectsize)+440,(int)((n.y-yoffset*building.reactor.length/100.0)*rectsize)+330,(int)(1/zoom*10),(int)(1/zoom*10));
         }
-        drawLines(bg, infoToDraw, (int)((double)(building.reactor.length+5.0-xoffset*building.reactor.length/100.0)*(720.0/building.reactor.length)/zoom)+440,(int)((double)(5.0+yoffset*building.reactor.length/100.0)*(720.0/building.reactor.length)/zoom)+330);
+        drawLines(bg, infoToDraw, (int)((building.reactor.length+5.0-xoffset*building.reactor.length/100.0)*rectsize)+440,(int)((5.0-yoffset*building.reactor.length/100.0)*rectsize)+330);
         g.drawImage(bi,0,0,null);
     }
 }
