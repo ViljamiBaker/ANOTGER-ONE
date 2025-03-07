@@ -19,6 +19,8 @@ public class Building {
     int xsize;
     int ysize;
 
+    double money = 0;
+
     public Building(String[][] template){
         this.xsize = template.length;
         this.ysize = template[0].length;
@@ -141,6 +143,7 @@ public class Building {
         neutsToRemove.clear();
         neutsToAdd.clear();
         updateNeutCounts();
+        rr.strings.add(String.valueOf(money));
         rr.strings.add(String.valueOf(neuts.size()));
         rr.strings.add(String.valueOf((double)System.nanoTime()/1000000.0-t));
         rr.paint(rr.g);
@@ -153,24 +156,25 @@ public class Building {
         new UnitTemplate("M", "W", new double[] {0.5,0.03,0.1}, Color.CYAN,new double[]{0,0.005,0.9999}),
         new UnitTemplate("C", "C", new double[] {0.5,0,0.25,1000,1500,0.001}, Color.ORANGE,new double[]{0,0.005,0.9999}),
         new UnitTemplate("C", "L", new double[] {0.5,0,1.0,150,150,0.001}, Color.YELLOW,new double[]{0,0.005,0.9999}),
-        new UnitTemplate("N", "A", new double[] {}, Color.WHITE,new double[]{0,1.0,0.0})
+        new UnitTemplate("S", "S", new double[] {0,0,10,5,1000,1000}, Color.PINK,new double[]{1,0.005,0.9999}),
+        new UnitTemplate("N", "A", new double[] {}, Color.WHITE,new double[]{0,1.0,0.0}),
     };
 
     public static void main(String[] args) {
         Building b = new Building(new String[][]
         {
-            /*{"B","B","B","B","B","B","B","B","B","B","B"},
-            {"B","U","C","W","C","U","C","W","C","U","B"},
-            {"B","C","B","C","B","C","B","C","B","C","B"},
-            {"B","W","C","U","C","W","C","U","C","W","B"},
-            {"B","C","B","C","B","L","B","C","B","C","B"},
-            {"B","U","C","W","L","P","L","W","C","U","B"},
-            {"B","C","B","C","B","L","B","C","B","C","B"},
-            {"B","W","C","U","C","W","C","U","C","W","B"},
-            {"B","C","B","C","B","C","B","C","B","C","B"},
-            {"B","U","C","W","C","U","C","W","C","U","B"},
-            {"B","B","B","B","B","B","B","B","B","B","B"},*/
             {"B","B","B","B","B","B","B","B","B","B","B"},
+            {"B","U","C","W","C","U","C","W","C","U","B"},
+            {"B","C","S","C","S","C","S","C","S","C","B"},
+            {"B","W","C","U","C","W","C","U","C","W","B"},
+            {"B","C","S","C","S","L","S","C","S","C","B"},
+            {"B","U","C","W","L","P","L","W","C","U","B"},
+            {"B","C","S","C","S","L","S","C","S","C","B"},
+            {"B","W","C","U","C","W","C","U","C","W","B"},
+            {"B","C","S","C","S","C","S","C","S","C","B"},
+            {"B","U","C","W","C","U","C","W","C","U","B"},
+            {"B","B","B","B","B","B","B","B","B","B","B"},
+            /*{"B","B","B","B","B","B","B","B","B","B","B"},
             {"B","A","A","A","A","A","A","A","A","A","B"},
             {"B","A","A","A","A","A","A","A","A","A","B"},
             {"B","A","A","W","W","W","A","A","A","A","B"},
@@ -179,7 +183,7 @@ public class Building {
             {"B","A","A","A","A","A","A","A","A","A","B"},
             {"B","A","A","A","A","A","A","A","A","A","B"},
             {"B","A","A","A","A","A","A","A","A","A","B"},
-            {"B","B","B","B","B","B","B","B","B","B","B"},
+            {"B","B","B","B","B","B","B","B","B","B","B"},*/
         }
         );
         while (true) {

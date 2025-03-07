@@ -5,7 +5,7 @@ public class UnitCode {
     public static void runCode(Square s){
         Neut[] neuts = building.getNeutCountAt(s.x, s.y);
         switch (s.u.type) {
-            case "F"://fissile
+            case "F"://fissile {randomNeutChance, neutspeed, neutlifetime, neutCollSpawnChance, neutSpeedExponent}
                 if(Math.random()<=s.u.temp[0]){
                     spawnNeut(s);
                 }
@@ -18,10 +18,10 @@ public class UnitCode {
                     }
                 }
                 break;
-            case "R"://Reflector
+            case "R"://Reflector {damn}
                     //crazy
                 break;
-            case "M"://Moderator
+            case "M"://Moderator {neutCollChance, desiredSpeed, changeSpeed}
                 for (Neut n : neuts) {
                     if(Math.random()<s.u.temp[0]){
                         double speed = Math.sqrt(n.xv*n.xv+n.yv*n.yv);
@@ -42,7 +42,7 @@ public class UnitCode {
                     }
                 }
                 break;
-            case "C"://Control Rod
+            case "C"://Control Rod {neutCollChance/Insertion, minInsertion, maxInsertion, minNeuts, maxNeuts, speed}
                 double desired = UtilVB.slopedLine(s.u.temp[1], s.u.temp[3], s.u.temp[2], s.u.temp[4], building.neuts.size());
                 if(desired<s.u.temp[0]){
                     s.u.temp[0]-=s.u.temp[5];
@@ -53,6 +53,22 @@ public class UnitCode {
                     if(Math.random()<s.u.temp[0]){
                         building.neutsToRemove.add(n);
                     }
+                }
+                break;
+            case "S"://Steam column {water, steam, waterGainRate, steamSellRate, maxWater, maxSteam}
+                s.u.temp[0]+=Math.min(s.u.temp[2],s.u.temp[4]-s.u.temp[0]);
+                if(s.temperature>=100.0){
+                    double deltaWater = Math.min(Math.min(Math.min(s.u.temp[0],s.u.temp[5]-s.u.temp[1]),s.temperature-100.0), s.u.temp[2]);
+                    s.u.temp[0]-=deltaWater;
+                    s.u.temp[1]+=deltaWater;
+                    s.temperature-=deltaWater;
+                    double deltaSteam = Math.min(s.u.temp[1], s.u.temp[3]);
+                    s.u.temp[1]-=deltaSteam;
+                    building.money += deltaSteam;
+                }else{
+                    if(s.u.temp[1]<0.0001) break;
+                    double deltaSteam = Math.min(100.0-s.temperature,s.u.temp[1]);
+                    s.u.temp[1]-=deltaSteam;
                 }
                 break;
             default:
