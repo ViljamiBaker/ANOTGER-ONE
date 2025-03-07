@@ -6,9 +6,7 @@ import java.util.concurrent.TimeUnit;
 
 public class Building {
 
-    Unit[][] reactor;
-
-    double[][] temperature;
+    Square[][] reactor;
 
     Neut[][][] neutCounts;
 
@@ -18,28 +16,20 @@ public class Building {
     ArrayList<Neut> neutsToRemove = new ArrayList<>();
     ArrayList<Neut> neutsToAdd = new ArrayList<>();
 
-    UnitTemplate[] uts = {
-        new UnitTemplate("F", "U", new double[] {0.05, 0.1, 1000, 0.05}, Color.GREEN,false),
-        new UnitTemplate("R", "B", new double[] {1}, Color.GRAY,true),
-        new UnitTemplate("M", "W", new double[] {0.5,0.01}, Color.CYAN,false),
-        new UnitTemplate("C", "C", new double[] {0.5,0,1,500,600,0.05}, Color.ORANGE,false)
-    };
-
     int xsize;
     int ysize;
 
     public Building(String[][] template){
         this.xsize = template.length;
         this.ysize = template[0].length;
-        reactor = new Unit[xsize][ysize];
-        temperature = new double[xsize][ysize];
+        reactor = new Square[xsize][ysize];
         neutCounts = new Neut[xsize][ysize][0];
         UnitCode.building = this;
         for (int x = 0; x < xsize; x++) {
             for (int y = 0; y < ysize; y++) {
                 for (int i = 0; i < uts.length; i++) {
-                    if(uts[i].subtype().equals(template[x][y].substring(0, 1))){
-                        reactor[x][y] = new Unit(uts[i], Integer.parseInt(template[x][i].substring(1, 2)), x, y);
+                    if(uts[i].subtype().equals(template[x][y])){
+                        reactor[x][y] = new Square(new Unit(uts[i]), x, y);
                     }
                 }
             }
@@ -47,40 +37,20 @@ public class Building {
         rr = new ReactorRenderer(this);
     }
 
-    public void frame(){
-        for (int x = 0; x < reactor.length; x++) {
-            for (int y = 0; y < reactor[0].length; y++) {
-                UnitCode.runCode(reactor[x][y]);
-            }
-        }
-        for (int i = 0; i < neuts.size(); i++) {
-            updateNeut(neuts.get(i));
-        }
-        neuts.removeAll(neutsToRemove);
-        neuts.addAll(neutsToAdd);
-        neutsToRemove.clear();
-        neutsToAdd.clear();
-        updateNeutCounts();
-        rr.infoToDraw = new String[]{
-            String.valueOf(neuts.size()),
-        };
-        rr.paint(rr.g);
-    }
-
     public void updateNeut(Neut n){
-        if(!getUnitAt((int)(n.x+n.xv), (int)(n.y+n.yv)).solid){
+        if(!(getSquareAt((int)(n.x+n.xv), (int)(n.y+n.yv)).u.global[0]==1)){
             n.x+=n.xv;
             n.y+=n.yv;
         }else{
-            Unit u = getUnitAt((int)(n.x+n.xv), (int)(n.y+n.yv));
-            if(Math.abs(n.x-u.x-0.5)>Math.abs(n.y-u.y-0.5)){
-                if(n.x-u.x-0.5<0){
+            Square s = getSquareAt((int)(n.x+n.xv), (int)(n.y+n.yv));
+            if(Math.abs(n.x-s.x-0.5)>Math.abs(n.y-s.y-0.5)){
+                if(n.x-s.x-0.5<0){
                     n.xv=Math.abs(n.xv)*-1;
                 }else{
                     n.xv=Math.abs(n.xv)*1;
                 }
             }else{
-                if(n.y-u.y-0.5<0){
+                if(n.y-s.y-0.5<0){
                     n.yv=Math.abs(n.yv)*-1;
                 }else{
                     n.yv=Math.abs(n.yv)*1;
@@ -93,9 +63,9 @@ public class Building {
         }
     }
 
-    public Unit getUnitAt(int x, int y){
+    public Square getSquareAt(int x, int y){
         if(x<0||x>=xsize||y<0||y>=ysize){
-            return new Unit(uts[0], 0, 0, 0);
+            return new Square(new Unit(uts[0]),0,0);
         }
         return reactor[x][y];
     }
@@ -130,20 +100,85 @@ public class Building {
         neutsToAdd.add(new Neut(x+0.5, y+0.5, xv, yv, lifetime));
     }
 
+    int[][] dirs = {{1,0},{1,1},{0,1},{-1,1},{-1,0},{-1,-1},{0,-1},{1,-1},};
+    private void updateTemperatures(){
+        for (int x = 0; x < reactor.length; x++) {
+            for (int y = 0; y < reactor[0].length; y++) {
+                Square s = reactor[x][y];
+                double heatLost = s.temperature*s.u.global[1];
+                for (int[] dir : dirs) {
+                    Square s2 = getSquareAt(x+dir[0],y+dir[1]);
+                    s2.nextSquare.temperature += heatLost*s2.u.global[2];
+                    s.nextSquare.temperature -= heatLost*s2.u.global[2];
+                }
+                s.nextSquare.temperature *= s.u.global[2];
+            }
+        }
+    }
+
+    public void frame(){
+        double t = System.nanoTime()/1000000.0;
+        for (int x = 0; x < reactor.length; x++) {
+            for (int y = 0; y < reactor[0].length; y++) {
+                if(reactor[x][y] == null){
+                    System.out.println(x);
+                    System.out.println(y);
+                }
+                UnitCode.runCode(reactor[x][y]);
+            }
+        }
+        updateTemperatures();
+        for (int x = 0; x < reactor.length; x++) {
+            for (int y = 0; y < reactor[0].length; y++) {
+                reactor[x][y].update();;
+            }
+        }
+        for (int i = 0; i < neuts.size(); i++) {
+            updateNeut(neuts.get(i));
+        }
+        neuts.removeAll(neutsToRemove);
+        neuts.addAll(neutsToAdd);
+        neutsToRemove.clear();
+        neutsToAdd.clear();
+        updateNeutCounts();
+        rr.strings.add(String.valueOf(neuts.size()));
+        rr.strings.add(String.valueOf((double)System.nanoTime()/1000000.0-t));
+        rr.paint(rr.g);
+    }
+
+    UnitTemplate[] uts = {
+        new UnitTemplate("F", "U", new double[] {0.0005, 0.1, 1000, 0.1, 4, 20, 3}, Color.GREEN,new double[]{0,0.005,0.9999}),
+        new UnitTemplate("F", "P", new double[] {0.05, 0.1, 1000, 0.0, 4, 20, 3}, Color.MAGENTA,new double[]{0,0.005,0.9999}),
+        new UnitTemplate("R", "B", new double[] {1}, Color.GRAY,new double[]{1,0.005,0.9999}),
+        new UnitTemplate("M", "W", new double[] {0.5,0.03}, Color.CYAN,new double[]{0,0.005,0.9999}),
+        new UnitTemplate("C", "C", new double[] {0.5,0,0.25,1000,1500,0.001}, Color.ORANGE,new double[]{0,0.005,0.9999}),
+        new UnitTemplate("C", "L", new double[] {0.5,0,1.0,150,150,0.001}, Color.YELLOW,new double[]{0,0.005,0.9999}),
+        new UnitTemplate("N", "A", new double[] {}, Color.WHITE,new double[]{0,1.0,0.0})
+    };
+
     public static void main(String[] args) {
         Building b = new Building(new String[][]
         {
-            {"B0","B0","B0","B0","B0","B0","B0","B0","B0","B0","B0"},
-            {"B0","U0","C0","W0","C0","U0","C0","W0","C0","U0","B0"},
-            {"B0","C0","B0","C0","B0","C0","B0","C0","B0","C0","B0"},
-            {"B0","U0","C0","W0","C0","U0","C0","W0","C0","U0","B0"},
-            {"B0","C0","B0","C0","B0","C0","B0","C0","B0","C0","B0"},
-            {"B0","U0","C0","W0","C0","U0","C0","W0","C0","U0","B0"},
-            {"B0","B0","B0","B0","B0","B0","B0","B0","B0","B0","B0"},
-            //{"B0","W0","W0","W0","B0","B0","B0","B0","B0","B0","B0"},
-            //{"B0","W0","U0","W0","B0","B0","B0","B0","B0","B0","B0"},
-            //{"B0","W0","W0","W0","B0","B0","B0","B0","B0","B0","B0"},
-            //{"B0","B0","B0","B0","B0","B0","B0","B0","B0","B0","B0"},
+            {"B","B","B","B","B","B","B","B","B","B","B"},
+            {"B","U","C","W","C","U","C","W","C","U","B"},
+            {"B","C","B","C","B","C","B","C","B","C","B"},
+            {"B","W","C","U","C","W","C","U","C","U","B"},
+            {"B","C","B","C","B","L","B","C","B","C","B"},
+            {"B","U","C","W","L","P","L","W","C","U","B"},
+            {"B","C","B","C","B","L","B","C","B","C","B"},
+            {"B","W","C","U","C","W","C","U","C","U","B"},
+            {"B","C","B","C","B","C","B","C","B","C","B"},
+            {"B","U","C","W","C","U","C","W","C","U","B"},
+            {"B","B","B","B","B","B","B","B","B","B","B"},
+            /*{"B","U","U","U","U","U","U","U","U","U","B"},
+            {"B","U","U","U","U","U","U","U","U","U","B"},
+            {"B","U","U","U","U","U","U","U","U","U","B"},
+            {"B","C","C","C","C","C","C","C","C","C","B"},
+            {"B","C","C","C","C","C","C","C","C","C","B"},
+            {"B","U","U","U","U","U","U","U","U","U","B"},
+            {"B","U","U","U","U","U","U","U","U","U","B"},
+            {"B","U","U","U","U","U","U","U","U","U","B"},
+            {"B","B","B","B","B","B","B","B","B","B","B"},*/
         }
         );
         while (true) {

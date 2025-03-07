@@ -5,12 +5,13 @@ import javax.swing.JFrame;
 import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.image.BufferedImage;
-
+import java.util.ArrayList;
 import java.awt.event.KeyEvent;
 
 public class ReactorRenderer extends JFrame{
     Building building;
     public String[] infoToDraw = new String[0];
+    public ArrayList<String> strings = new ArrayList<>();
     Graphics g;
     keyListener kl;
     double xoffset = 0;
@@ -35,6 +36,18 @@ public class ReactorRenderer extends JFrame{
         }
     }
 
+    private Color addColor(Color c1, double r, double b, double g){
+        double red = c1.getRed() + r;
+        double blue = c1.getBlue() + b;
+        double green = c1.getGreen() + g;
+        double max = Math.max(Math.max(red, green), blue);
+        if(max>255){
+            red *= 255.0/max;
+            blue *= 255.0/max;
+            green *= 255.0/max;
+        }
+        return new Color((int)red,(int)green,(int)blue);
+    }
     @Override
     public void paint(Graphics g){
         try {
@@ -57,44 +70,48 @@ public class ReactorRenderer extends JFrame{
                 zoom*=0.99;
             }
         } catch (Exception e) {}
-        Unit u = building.getUnitAt(EXIT_ON_CLOSE, ABORT);
-        infoToDraw = new String[u.temp.length + 3];
-
-        for (int i = 0; i < infoToDraw.length; i++) {
-            switch (i) {
-                case 0:
-                    infoToDraw[i] = "A";
-                    break;
-                case 1:
-                    infoToDraw[i] = "A";
-                    break;
-                case 2:
-                    infoToDraw[i] = "A";
-                    break;
-                default:
-                    infoToDraw[i] = String.valueOf(u.temp[i-3]);
-                    break;
-            }
-        }
         BufferedImage bi = new BufferedImage(800, 800, BufferedImage.TYPE_INT_ARGB);
         Graphics bg = bi.getGraphics();
         bg.setColor(Color.WHITE);
         bg.fillRect(0,0,800,800);
         bg.setColor(Color.BLACK);
         double rectsize = (720.0/building.reactor.length)/zoom;
-        for(int x = 0; x < building.reactor.length; x++){
-            for(int y = 0; y < building.reactor[x].length; y++){
-                Color c = building.reactor[x][y].color;
-                bg.setColor(new Color((int)Math.min(c.getRed() + building.temperature[x][y],255.0), c.getGreen(), c.getBlue()));
-                bg.fillRect((int)((x-xoffset*building.reactor.length/100.0)*rectsize)+440,(int)((y-yoffset*building.reactor.length/100.0)*rectsize)+330,Math.max((int)(rectsize),1)+1,Math.max((int)(rectsize),1)+1);
+        Square s = building.getSquareAt((int)(xoffset*building.reactor.length/100.0+0.5), (int)(yoffset*building.reactor.length/100.0));
+        strings.add("square:");
+        strings.add(String.valueOf(s.x));
+        strings.add(String.valueOf(s.y));
+        strings.add(String.valueOf(s.temperature));
+        strings.add("temp:");
+        for (int i = 0; i < s.u.temp.length+s.u.global.length+1; i++) {
+            if(i<s.u.temp.length){
+                strings.add(String.valueOf(s.u.temp[i]));
+            }else if(i==s.u.temp.length){
+                strings.add("global:");
+            }else{
+                strings.add(String.valueOf(s.u.global[i-s.u.temp.length-1]));
             }
         }
+        infoToDraw = strings.toArray(new String[0]);
+        try {
+        for(int x = 0; x < building.reactor.length; x++){
+               for(int y = 0; y < building.reactor[x].length; y++){
+                    Square s2 = building.getSquareAt(x, y);
+                    Color c = addColor(s2.u.color,(int)s2.temperature/10,0,0);
+                    if(x==s.x&&y==s.y){
+                        c = addColor(c, 100,0,0);
+                    }
+                    bg.setColor(c);
+                    bg.fillRect((int)((x-xoffset*building.reactor.length/100.0)*rectsize)+400,(int)((y-yoffset*building.reactor.length/100.0)*rectsize)+400,Math.max((int)(rectsize),1)+1,Math.max((int)(rectsize),1)+1);
+                }
+            }
+        } catch (Exception e) {}
         bg.setColor(Color.BLUE);
         for (int i = 0; i < building.neuts.size(); i++) {
             Neut n = building.neuts.get(i);
-            bg.drawOval((int)((n.x-xoffset*building.reactor.length/100.0)*rectsize)+440,(int)((n.y-yoffset*building.reactor.length/100.0)*rectsize)+330,(int)(1/zoom*10),(int)(1/zoom*10));
+            bg.drawOval((int)((n.x-xoffset*building.reactor.length/100.0)*rectsize)+400,(int)((n.y-yoffset*building.reactor.length/100.0)*rectsize)+400,(int)(1/zoom*10),(int)(1/zoom*10));
         }
-        drawLines(bg, infoToDraw, (int)((building.reactor.length+5.0-xoffset*building.reactor.length/100.0)*rectsize)+440,(int)((5.0-yoffset*building.reactor.length/100.0)*rectsize)+330);
+        drawLines(bg,infoToDraw,40,80);
         g.drawImage(bi,0,0,null);
+        strings.clear();
     }
 }
