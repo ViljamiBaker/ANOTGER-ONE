@@ -43,7 +43,13 @@ public class UnitCode {
                 }
                 break;
             case "C"://Control Rod {neutCollChance/Insertion, minInsertion, maxInsertion, minNeuts, maxNeuts, speed}
-                double desired = UtilVB.slopedLine(s.u.temp[1], s.u.temp[3], s.u.temp[2], s.u.temp[4], building.neuts.size());
+                double desired = 0;
+                if(building.rodOverride>0.0){
+                    desired = UtilVB.slopedLine(s.u.temp[1], 0, s.u.temp[2], 1, building.rodOverride);
+                    
+                }else{
+                    desired = UtilVB.slopedLine(s.u.temp[1], s.u.temp[3], s.u.temp[2], s.u.temp[4], building.neuts.size());
+                }
                 if(desired<s.u.temp[0]){
                     s.u.temp[0]-=s.u.temp[5];
                 }else if(desired>s.u.temp[0]){

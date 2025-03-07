@@ -76,6 +76,18 @@ public class ReactorRenderer extends JFrame{
             if(kl.keyDown(KeyEvent.VK_G)){
                 heatDiv*=0.99;
             }
+            if(kl.keyDown(KeyEvent.VK_R)){
+                building.rodOverride+=0.005;
+                if(building.rodOverride>=1.0){
+                    building.rodOverride = 1.0;
+                }
+            }
+            if(kl.keyDown(KeyEvent.VK_F)){
+                building.rodOverride-=0.005;
+                if(building.rodOverride<=0.0){
+                    building.rodOverride = 0.0;
+                }
+            }
         } catch (Exception e) {}
         BufferedImage bi = new BufferedImage(800, 800, BufferedImage.TYPE_INT_ARGB);
         Graphics bg = bi.getGraphics();
@@ -84,7 +96,7 @@ public class ReactorRenderer extends JFrame{
         bg.setColor(Color.BLACK);
         strings.add(String.valueOf(heatDiv));
         double rectsize = (720.0/building.reactor.length)/zoom;
-        Square s = building.getSquareAt((int)(xoffset*building.reactor.length/100.0+0.5), (int)(yoffset*building.reactor.length/100.0));
+        Square s = building.getSquareAt((int)(xoffset*building.reactor.length/100.0), (int)(yoffset*building.reactor.length/100.0));
         strings.add("square:");
         strings.add(String.valueOf(s.x));
         strings.add(String.valueOf(s.y));
