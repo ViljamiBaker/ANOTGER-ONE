@@ -108,7 +108,7 @@ public class ReactorRenderer extends JFrame{
         bg.setColor(Color.BLUE);
         for (int i = 0; i < building.neuts.size(); i++) {
             Neut n = building.neuts.get(i);
-            bg.drawOval((int)((n.x-xoffset*building.reactor.length/100.0)*rectsize)+400,(int)((n.y-yoffset*building.reactor.length/100.0)*rectsize)+400,(int)(1/zoom*10),(int)(1/zoom*10));
+            bg.drawOval((int)((n.x-xoffset*building.reactor.length/100.0)*rectsize)+400-(int)(0.5/zoom*10),(int)((n.y-yoffset*building.reactor.length/100.0)*rectsize)+400-(int)(0.5/zoom*10),(int)(1/zoom*10),(int)(1/zoom*10));
         }
         drawLines(bg,infoToDraw,40,80);
         g.drawImage(bi,0,0,null);

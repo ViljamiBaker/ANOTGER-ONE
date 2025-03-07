@@ -148,9 +148,9 @@ public class Building {
 
     UnitTemplate[] uts = {
         new UnitTemplate("F", "U", new double[] {0.0005, 0.1, 1000, 0.1, 4, 20, 3}, Color.GREEN,new double[]{0,0.005,0.9999}),
-        new UnitTemplate("F", "P", new double[] {0.05, 0.1, 1000, 0.0, 4, 20, 3}, Color.MAGENTA,new double[]{0,0.005,0.9999}),
+        new UnitTemplate("F", "P", new double[] {0.05, 0.25, 10000, 0.0, 4, 20, 3}, Color.MAGENTA,new double[]{0,0.005,0.9999}),
         new UnitTemplate("R", "B", new double[] {1}, Color.GRAY,new double[]{1,0.005,0.9999}),
-        new UnitTemplate("M", "W", new double[] {0.5,0.03}, Color.CYAN,new double[]{0,0.005,0.9999}),
+        new UnitTemplate("M", "W", new double[] {0.5,0.03,0.1}, Color.CYAN,new double[]{0,0.005,0.9999}),
         new UnitTemplate("C", "C", new double[] {0.5,0,0.25,1000,1500,0.001}, Color.ORANGE,new double[]{0,0.005,0.9999}),
         new UnitTemplate("C", "L", new double[] {0.5,0,1.0,150,150,0.001}, Color.YELLOW,new double[]{0,0.005,0.9999}),
         new UnitTemplate("N", "A", new double[] {}, Color.WHITE,new double[]{0,1.0,0.0})
@@ -159,26 +159,27 @@ public class Building {
     public static void main(String[] args) {
         Building b = new Building(new String[][]
         {
-            {"B","B","B","B","B","B","B","B","B","B","B"},
+            /*{"B","B","B","B","B","B","B","B","B","B","B"},
             {"B","U","C","W","C","U","C","W","C","U","B"},
             {"B","C","B","C","B","C","B","C","B","C","B"},
-            {"B","W","C","U","C","W","C","U","C","U","B"},
+            {"B","W","C","U","C","W","C","U","C","W","B"},
             {"B","C","B","C","B","L","B","C","B","C","B"},
             {"B","U","C","W","L","P","L","W","C","U","B"},
             {"B","C","B","C","B","L","B","C","B","C","B"},
-            {"B","W","C","U","C","W","C","U","C","U","B"},
+            {"B","W","C","U","C","W","C","U","C","W","B"},
             {"B","C","B","C","B","C","B","C","B","C","B"},
             {"B","U","C","W","C","U","C","W","C","U","B"},
-            {"B","B","B","B","B","B","B","B","B","B","B"},
-            /*{"B","U","U","U","U","U","U","U","U","U","B"},
-            {"B","U","U","U","U","U","U","U","U","U","B"},
-            {"B","U","U","U","U","U","U","U","U","U","B"},
-            {"B","C","C","C","C","C","C","C","C","C","B"},
-            {"B","C","C","C","C","C","C","C","C","C","B"},
-            {"B","U","U","U","U","U","U","U","U","U","B"},
-            {"B","U","U","U","U","U","U","U","U","U","B"},
-            {"B","U","U","U","U","U","U","U","U","U","B"},
             {"B","B","B","B","B","B","B","B","B","B","B"},*/
+            {"B","B","B","B","B","B","B","B","B","B","B"},
+            {"B","A","A","A","A","A","A","A","A","A","B"},
+            {"B","A","A","A","A","A","A","A","A","A","B"},
+            {"B","A","A","W","W","W","A","A","A","A","B"},
+            {"B","P","A","W","W","W","A","A","A","A","B"},
+            {"B","A","A","W","W","W","A","A","A","A","B"},
+            {"B","A","A","A","A","A","A","A","A","A","B"},
+            {"B","A","A","A","A","A","A","A","A","A","B"},
+            {"B","A","A","A","A","A","A","A","A","A","B"},
+            {"B","B","B","B","B","B","B","B","B","B","B"},
         }
         );
         while (true) {

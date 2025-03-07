@@ -25,10 +25,20 @@ public class UnitCode {
                 for (Neut n : neuts) {
                     if(Math.random()<s.u.temp[0]){
                         double speed = Math.sqrt(n.xv*n.xv+n.yv*n.yv);
-                        n.xv/=speed;
-                        n.yv/=speed;
-                        n.xv*=s.u.temp[1];
-                        n.yv*=s.u.temp[1];
+                        double diff = s.u.temp[1]-speed;
+                        if(Math.signum(diff)>0) continue;
+                        if(Math.abs(diff)<=s.u.temp[2]){
+                            n.xv/=speed;
+                            n.yv/=speed;
+                            n.xv*=s.u.temp[1];
+                            n.yv*=s.u.temp[1];
+                        }else{
+                            double deltaSpeed = s.u.temp[2] * Math.signum(diff);
+                            n.xv/=speed;
+                            n.yv/=speed;
+                            n.xv*=speed+deltaSpeed;
+                            n.yv*=speed+deltaSpeed;
+                        }
                     }
                 }
                 break;
