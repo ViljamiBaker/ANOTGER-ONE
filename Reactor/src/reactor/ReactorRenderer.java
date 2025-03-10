@@ -18,6 +18,8 @@ public class ReactorRenderer extends JFrame{
     double yoffset = 0;
     double zoom = 1;
     double heatDiv = 10;
+    double zcooldown = 0;
+    int z = 0;
     public ReactorRenderer(Building building){
         this.building = building;
         this.setTitle("painting");
@@ -77,6 +79,18 @@ public class ReactorRenderer extends JFrame{
                 heatDiv*=0.99;
             }
             if(kl.keyDown(KeyEvent.VK_R)){
+                if(zcooldown<0){
+                    z++;
+                    zcooldown=1;
+                }
+            }
+            if(kl.keyDown(KeyEvent.VK_F)){
+                if(zcooldown<0){
+                    z--;
+                    zcooldown=1;
+                }
+            }
+            if(kl.keyDown(KeyEvent.VK_R)){
                 building.rodOverride+=0.005;
                 if(building.rodOverride>=1.0){
                     building.rodOverride = 1.0;
@@ -88,6 +102,7 @@ public class ReactorRenderer extends JFrame{
                     building.rodOverride = 0.0;
                 }
             }
+            zcooldown-=1.0/60.0;
         } catch (Exception e) {}
         BufferedImage bi = new BufferedImage(800, 800, BufferedImage.TYPE_INT_ARGB);
         Graphics bg = bi.getGraphics();
@@ -96,7 +111,7 @@ public class ReactorRenderer extends JFrame{
         bg.setColor(Color.BLACK);
         strings.add(String.valueOf(heatDiv));
         double rectsize = (720.0/building.reactor.length)/zoom;
-        Square s = building.getSquareAt((int)(xoffset*building.reactor.length/100.0), (int)(yoffset*building.reactor.length/100.0));
+        Square s = building.getSquareAt((int)(xoffset*building.reactor.length/100.0), (int)(yoffset*building.reactor.length/100.0),z);
         strings.add("square:");
         strings.add(String.valueOf(s.x));
         strings.add(String.valueOf(s.y));
@@ -115,7 +130,7 @@ public class ReactorRenderer extends JFrame{
         try {
         for(int x = 0; x < building.reactor.length; x++){
                for(int y = 0; y < building.reactor[x].length; y++){
-                    Square s2 = building.getSquareAt(x, y);
+                    Square s2 = building.getSquareAt(x, y, z);
                     Color c = addColor(s2.u.color,(int)(s2.temperature/heatDiv),0,0);
                     if(x==s.x&&y==s.y){
                         c = addColor(c, 100,0,0);
@@ -128,6 +143,7 @@ public class ReactorRenderer extends JFrame{
         bg.setColor(Color.BLUE);
         for (int i = 0; i < building.neuts.size(); i++) {
             Neut n = building.neuts.get(i);
+            if((int)n.z!=z)continue;
             bg.drawOval((int)((n.x-xoffset*building.reactor.length/100.0)*rectsize)+400-(int)(0.5/zoom*10),(int)((n.y-yoffset*building.reactor.length/100.0)*rectsize)+400-(int)(0.5/zoom*10),(int)(1/zoom*10),(int)(1/zoom*10));
         }
         drawLines(bg,infoToDraw,40,80);
