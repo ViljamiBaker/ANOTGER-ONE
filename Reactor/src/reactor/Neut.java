@@ -14,6 +14,7 @@ public class Neut {
         this.z = z;
         this.xv = xv;
         this.yv = yv;
+        this.zv = zv;
         this.lifetime = lifetime;
     }
 }
