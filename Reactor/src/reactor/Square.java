@@ -4,15 +4,17 @@ public class Square {
     Unit u;
     int x;
     int y;
+    int z;
     double temperature;
 
     Square nextSquare;
 
-    public Square(Unit u, int x, int y){
+    public Square(Unit u, int x, int y, int z){
         this.temperature = 0;
         this.u = u;
         this.x = x;
         this.y = y;
+        this.z = z;
         nextSquare = new Square(this);
     }
 
@@ -21,6 +23,7 @@ public class Square {
         this.u = new Unit(s.u);
         this.x = s.x;
         this.y = s.y;
+        this.z = s.z;
         nextSquare = null;
     }
 

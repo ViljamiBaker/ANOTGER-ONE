@@ -3,7 +3,7 @@ package reactor;
 public class UnitCode {
     public static Building building;
     public static void runCode(Square s){
-        Neut[] neuts = building.getNeutCountAt(s.x, s.y);
+        Neut[] neuts = building.getNeutCountAt(s.x, s.y, s.z);
         switch (s.u.type) {
             case "F"://fissile {randomNeutChance, neutspeed, neutlifetime, neutCollSpawnChance, neutSpeedExponent}
                 if(Math.random()<=s.u.temp[0]){
@@ -81,10 +81,12 @@ public class UnitCode {
                 break;
         }
     }
-    
+    //https://math.stackexchange.com/questions/44689/how-to-find-a-random-axis-or-unit-vector-in-3d
     public static void spawnNeut(Square s){
         s.nextSquare.temperature+= s.u.temp[5];
         double dir = Math.random()*Math.PI*2;
-        building.spawnNeut(s.x, s.y, (Math.sin(dir)*s.u.temp[1]),(Math.cos(dir)*s.u.temp[1]),(int)s.u.temp[2]);
+        double z = Math.random()*2-1;
+        double z2 = Math.sqrt(1-z*z);
+        building.spawnNeut(s.x, s.y, s.z, (z2*Math.sin(dir)*s.u.temp[1]),(z2*Math.cos(dir)*s.u.temp[1]), z*s.u.temp[1],(int)s.u.temp[2]);
     }
 }
