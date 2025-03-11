@@ -90,13 +90,13 @@ public class ReactorRenderer extends JFrame{
                     zcooldown=1;
                 }
             }
-            if(kl.keyDown(KeyEvent.VK_R)){
+            if(kl.keyDown(KeyEvent.VK_Y)){
                 building.rodOverride+=0.005;
                 if(building.rodOverride>=1.0){
                     building.rodOverride = 1.0;
                 }
             }
-            if(kl.keyDown(KeyEvent.VK_F)){
+            if(kl.keyDown(KeyEvent.VK_H)){
                 building.rodOverride-=0.005;
                 if(building.rodOverride<=0.0){
                     building.rodOverride = 0.0;
@@ -110,6 +110,7 @@ public class ReactorRenderer extends JFrame{
         bg.fillRect(0,0,800,800);
         bg.setColor(Color.BLACK);
         strings.add(String.valueOf(heatDiv));
+        strings.add(String.valueOf(z));
         double rectsize = (720.0/building.reactor.length)/zoom;
         Square s = building.getSquareAt((int)(xoffset*building.reactor.length/100.0), (int)(yoffset*building.reactor.length/100.0),z);
         strings.add("square:");

@@ -11,6 +11,7 @@ public class Neut {
     public Neut(double x, double y, double z, double xv, double yv, double zv, int lifetime){
         this.x = x;
         this.y = y;
+        this.z = z;
         this.xv = xv;
         this.yv = yv;
         this.lifetime = lifetime;
