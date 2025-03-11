@@ -7,7 +7,7 @@ public class Building {
 
     Square[][][] reactor;
 
-    Neut[][][][] neutCounts;
+    int[][][] neutCounts;
 
     ReactorRenderer rr;
 
@@ -28,7 +28,7 @@ public class Building {
         this.ysize = template[0].length;
         this.zsize = template.length;
         reactor = new Square[xsize][ysize][zsize];
-        neutCounts = new Neut[xsize][ysize][zsize][0];
+        neutCounts = new int[xsize][ysize][zsize];
         UnitCode.building = this;
         for (int x = 0; x < xsize; x++) {
             for (int y = 0; y < ysize; y++) {
@@ -45,54 +45,19 @@ public class Building {
     }
 
     public void updateNeut(Neut n){
-        if(!(getSquareAt((int)(n.x+n.xv), (int)(n.y+n.yv), (int)(n.z+n.zv)).u.global[0]==1)){
-            n.x+=n.xv;
-            n.y+=n.yv;
-            n.z+=n.zv;
-        }else{
-            Square s = getSquareAt((int)(n.x+n.xv), (int)(n.y+n.yv), (int)(n.z+n.zv));
-            int lowestDim = 0;
-            if(Math.abs(n.x-s.x-0.5)>Math.abs(n.y-s.y-0.5)){
-                if(Math.abs(n.x-s.x-0.5)>Math.abs(n.z-s.z-0.5)){//x
-                    lowestDim = 0;
-                }else{//z
-                    lowestDim = 2;
-                }
-            }else{
-                if(Math.abs(n.y-s.y-0.5)>Math.abs(n.z-s.z-0.5)){//y
-                    lowestDim = 1;
-                }else{//z
-                    lowestDim = 2;
-                }
-            }
-            switch (lowestDim) {
-                case 0: //x
-                    if(n.x-s.x-0.5<0){
-                        n.xv=Math.abs(n.xv)*-1;
-                    }else{
-                        n.xv=Math.abs(n.xv)*1;
+        for (double i = 0; i < n.lifetime; i++) {
+            if((getSquareAt((int)(n.x+n.xd*i), (int)(n.y+n.yd*i), (int)(n.z+n.zd*i)).u.global[0]==1)){
+                Square s = getSquareAt((int)(n.x+n.xd*i), (int)(n.y+n.yd*i), (int)(n.z+n.zd*i));
+                boolean intersection = n.intersection(s);
+                if(intersection){
+                    if(Math.random()<=s.u.global[3]){
+                        neutCounts[s.x][s.y][s.z]++;
+                        break;
                     }
-                    break;
-                case 1: //y
-                    if(n.y-s.y-0.5<0){
-                        n.yv=Math.abs(n.yv)*-1;
-                    }else{
-                        n.yv=Math.abs(n.yv)*1;
-                    }
-                    break;
-                case 2: //z
-                if(n.z-s.z-0.5<0){
-                        n.zv=Math.abs(n.zv)*-1;
-                    }else{
-                        n.zv=Math.abs(n.zv)*1;
-                    }
-                    break;
+                };
             }
         }
-        n.lifetime--;
-        if(n.lifetime<=0){
-            neutsToRemove.add(n);
-        }
+        neutsToRemove.add(n);
     }
 
     public Square getSquareAt(int x, int y, int z){
@@ -102,32 +67,15 @@ public class Building {
         return reactor[x][y][z];
     }
 
-    public Neut[] getNeutCountAt(int x, int y, int z){
+    public int getNeutCountAt(int x, int y, int z){
         if(x<0||x>=xsize||y<0||y>=ysize||z<0||z>=zsize){
-            return new Neut[0];
+            return 0;
         }
         return neutCounts[x][y][z];
     }
 
     private void updateNeutCounts(){
-        neutCounts = new Neut[xsize][ysize][zsize][0];
-        for (int x = 0; x < xsize; x++) {
-            for (int y = 0; y < ysize; y++) {
-                for (int z = 0; z < zsize; z++) {
-                    ArrayList<Neut> neuts2 = new ArrayList<>();
-                    for (int i = 0; i < neuts.size(); i++) {
-                        if((int)neuts.get(i).x<0||(int)neuts.get(i).x>=xsize||(int)neuts.get(i).y<0||(int)neuts.get(i).y>=ysize){
-                            continue;
-                        }
-                        if((int)neuts.get(i).x==x&&(int)neuts.get(i).y==y){
-                            neuts2.add(neuts.get(i));
-                        }
-                    }
-                    neutCounts[x][y][z] = neuts2.toArray(new Neut[0]);
-                }
-            }
-        }
-
+        neutCounts = new int[xsize][ysize][zsize];
     }
 
     public void spawnNeut(int x, int y, int z, double xv, double yv, Double zv, int lifetime){
@@ -195,13 +143,13 @@ public class Building {
     }
 
     UnitTemplate[] uts = {
-        new UnitTemplate("F", "U", new double[] {0.0005, 0.4, 1000, 0.1, 4, 20, 3}, Color.GREEN,new double[]{0,0.005,0.9999}),
-        new UnitTemplate("F", "P", new double[] {0.05, 0.4, 10000, 0.0, 4, 20, 3}, Color.MAGENTA,new double[]{0,0.005,0.9999}),
-        new UnitTemplate("R", "B", new double[] {1}, Color.GRAY,new double[]{1,0.005,0.9999}),
-        new UnitTemplate("M", "W", new double[] {0.5,0.03,0.02}, Color.CYAN,new double[]{0,0.005,0.9999}),
-        new UnitTemplate("C", "C", new double[] {0.5,0,0.25,4000,5000,0.001}, Color.ORANGE,new double[]{0,0.005,0.9999}),
-        new UnitTemplate("C", "L", new double[] {0.5,0,1.0,150,150,0.001}, Color.YELLOW,new double[]{0,0.005,0.9999}),
-        new UnitTemplate("S", "S", new double[] {0,0,10,5,1000,1000}, Color.PINK,new double[]{1,0.005,0.9999}),
+        new UnitTemplate("F", "U", new double[] {0.0005, 0.4, 1000, 0.1, 4, 20, 3}, Color.GREEN,new double[]{0,0.005,0.9999,0.0005,0.0}),
+        new UnitTemplate("F", "P", new double[] {0.05, 0.4, 10000, 0.0, 4, 20, 3}, Color.MAGENTA,new double[]{0,0.005,0.9999,0.0005,0.0}),
+        new UnitTemplate("R", "B", new double[] {1}, Color.GRAY,new double[]{1,0.005,0.9999,0.75,1.0}),
+        new UnitTemplate("M", "W", new double[] {0.5,0.03,0.02}, Color.CYAN,new double[]{0,0.005,0.9999,0.3,0.0}),
+        new UnitTemplate("C", "C", new double[] {0.5,0,0.25,4000,5000,0.001}, Color.ORANGE,new double[]{0,0.005,0.9999,0.1,0.2}),
+        new UnitTemplate("C", "L", new double[] {0.5,0,1.0,150,150,0.001}, Color.YELLOW,new double[]{0,0.005,0.9999,0.1,0.2}),
+        new UnitTemplate("S", "S", new double[] {0,0,10,5,1000,1000}, Color.PINK,new double[]{1,0.005,0.9999,0.0005,0.0}),
         new UnitTemplate("N", "A", new double[] {}, Color.WHITE,new double[]{0,1.0,0.0}),
     };
 

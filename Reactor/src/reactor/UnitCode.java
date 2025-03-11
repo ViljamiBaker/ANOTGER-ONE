@@ -3,7 +3,7 @@ package reactor;
 public class UnitCode {
     public static Building building;
     public static void runCode(Square s){
-        Neut[] neuts = building.getNeutCountAt(s.x, s.y, s.z);
+        int neuts = building.getNeutCountAt(s.x, s.y, s.z);
         switch (s.u.type) {
             case "F"://fissile {randomNeutChance, neutspeed, neutlifetime, neutCollSpawnChance, neutSpeedExponent}
                 if(Math.random()<=s.u.temp[0]){
@@ -22,7 +22,7 @@ public class UnitCode {
                     //crazy
                 break;
             case "M"://Moderator {neutCollChance, desiredSpeed, changeSpeed}
-                for (Neut n : neuts) {
+                for (int i = 0; i < neuts; i++) {
                     if(Math.random()<s.u.temp[0]){
                         double speed = Math.sqrt(n.xv*n.xv+n.yv*n.yv);
                         double diff = s.u.temp[1]-speed;
