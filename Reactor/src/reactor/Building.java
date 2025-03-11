@@ -2,7 +2,6 @@ package reactor;
 
 import java.awt.Color;
 import java.util.ArrayList;
-import java.util.concurrent.TimeUnit;
 
 public class Building {
 
@@ -98,7 +97,7 @@ public class Building {
 
     public Square getSquareAt(int x, int y, int z){
         if(x<0||x>=xsize||y<0||y>=ysize||z<0||z>=zsize){
-            return new Square(new Unit(uts[0]),0,0,0);
+            return new Square(new Unit(uts[0]),-1,-1,-1);
         }
         return reactor[x][y][z];
     }
@@ -147,7 +146,9 @@ public class Building {
                     Square s = reactor[x][y][z];
                     double heatLost = s.temperature*s.u.global[1];
                     for (int[] dir : dirs) {
-                        Square s2 = getSquareAt(x+dir[0],y+dir[1],y+dir[2]);
+                        Square s2 = getSquareAt(x+dir[0],y+dir[1],z+dir[2]);
+                        if(s.x==7&&s.y==7&&s.z==1){
+                        }
                         s2.nextSquare.temperature += heatLost*s2.u.global[2];
                         s.nextSquare.temperature -= heatLost*s2.u.global[2];
                     }
@@ -301,10 +302,10 @@ public class Building {
         }
         );
         while (true) {
-            long t = TimeUnit.NANOSECONDS.toMillis(System.nanoTime());
+            double t = System.nanoTime()/1000000.0;
             b.frame();
-            long t2 = TimeUnit.NANOSECONDS.toMillis(System.nanoTime());
-            try {Thread.sleep((int)Math.max(16-(t2-t),0));}catch(InterruptedException e){}
+            double t2 = System.nanoTime()/1000000.0;
+            try {Thread.sleep((int)Math.max(16.0-(t2-t),0.0));}catch(InterruptedException e){}
         }
     }
 }

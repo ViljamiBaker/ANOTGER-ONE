@@ -114,8 +114,7 @@ public class ReactorRenderer extends JFrame{
         double rectsize = (720.0/building.reactor.length)/zoom;
         Square s = building.getSquareAt((int)(xoffset*building.reactor.length/100.0), (int)(yoffset*building.reactor.length/100.0),z);
         strings.add("square:");
-        strings.add(String.valueOf(s.x));
-        strings.add(String.valueOf(s.y));
+        strings.add(String.valueOf(s.x) + ", "+ String.valueOf(s.y) + ", "+ String.valueOf(s.z));
         strings.add(String.valueOf(s.temperature));
         strings.add("temp:");
         for (int i = 0; i < s.u.temp.length+s.u.global.length+1; i++) {
