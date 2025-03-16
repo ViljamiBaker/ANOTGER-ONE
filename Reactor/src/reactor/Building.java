@@ -7,7 +7,7 @@ public class Building {
 
     Square[][][] reactor;
 
-    int[][][] neutCounts;
+    ArrayList3D<Neut> neutCounts;
 
     ReactorRenderer rr;
 
@@ -28,7 +28,7 @@ public class Building {
         this.ysize = template[0].length;
         this.zsize = template.length;
         reactor = new Square[xsize][ysize][zsize];
-        neutCounts = new int[xsize][ysize][zsize];
+        neutCounts = new ArrayList3D<Neut>(xsize,ysize,zsize);
         UnitCode.building = this;
         for (int x = 0; x < xsize; x++) {
             for (int y = 0; y < ysize; y++) {
@@ -51,7 +51,7 @@ public class Building {
                 boolean intersection = n.intersection(s);
                 if(intersection){
                     if(Math.random()<=s.u.global[3]){
-                        neutCounts[s.x][s.y][s.z]++;
+                        neutCounts.add(s.x, s.y, s.z, n);
                         break;
                     }
                 };
@@ -67,19 +67,19 @@ public class Building {
         return reactor[x][y][z];
     }
 
-    public int getNeutCountAt(int x, int y, int z){
+    public Neut[] getNeutCountAt(int x, int y, int z){
         if(x<0||x>=xsize||y<0||y>=ysize||z<0||z>=zsize){
-            return 0;
+            return new Neut[0];
         }
-        return neutCounts[x][y][z];
+        return neutCounts.get(x, y, z).toArray(new Neut[0]);
     }
 
     private void updateNeutCounts(){
-        neutCounts = new int[xsize][ysize][zsize];
+        neutCounts.clear();
     }
 
-    public void spawnNeut(int x, int y, int z, double xv, double yv, Double zv, int lifetime){
-        neutsToAdd.add(new Neut(x+0.5, y+0.5, z+0.5, xv, yv, zv, lifetime));
+    public void spawnNeut(int x, int y, int z, double xv, double yv, double zv, double speed, int lifetime){
+        neutsToAdd.add(new Neut(x+0.5, y+0.5, z+0.5, xv, yv, zv, speed, lifetime));
     }
 
     int[][] dirs = {

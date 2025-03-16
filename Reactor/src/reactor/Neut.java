@@ -7,8 +7,9 @@ public class Neut {
     double xd;
     double yd;
     double zd;
+    double speed;
     int lifetime;
-    public Neut(double x, double y, double z, double xd, double yd, double zd, int lifetime){
+    public Neut(double x, double y, double z, double xd, double yd, double zd, double speed, int lifetime){
         this.x = x;
         this.y = y;
         this.z = z;
@@ -32,5 +33,15 @@ public class Neut {
         }
     
         return tmin < tmax;
+    }
+
+    public Neut(Neut n){
+        this.x = n.x;
+        this.y = n.y;
+        this.z = n.z;
+        this.xd = n.xd;
+        this.yd = n.yd;
+        this.zd = n.zd;
+        this.lifetime = n.lifetime;
     }
 }

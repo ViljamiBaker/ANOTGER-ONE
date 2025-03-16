@@ -3,14 +3,14 @@ package reactor;
 public class UnitCode {
     public static Building building;
     public static void runCode(Square s){
-        int neuts = building.getNeutCountAt(s.x, s.y, s.z);
+        Neut[] neuts = building.getNeutCountAt(s.x, s.y, s.z);
         switch (s.u.type) {
             case "F"://fissile {randomNeutChance, neutspeed, neutlifetime, neutCollSpawnChance, neutSpeedExponent}
                 if(Math.random()<=s.u.temp[0]){
                     spawnNeut(s);
                 }
                 for (Neut n : neuts) {
-                    if(Math.random()>=1.0-s.u.temp[3]/Math.pow(Math.pow(n.xv+1,2)+Math.pow(n.yv+1,2),s.u.temp[4])){
+                    if(Math.random()>=1.0-s.u.temp[3]/Math.pow(n.speed,s.u.temp[4])){
                         building.neutsToRemove.add(n);
                         for (int i = 0; i < s.u.temp[6]; i++) {
                             spawnNeut(s);
@@ -18,26 +18,28 @@ public class UnitCode {
                     }
                 }
                 break;
-            case "R"://Reflector {damn}
-                    //crazy
+            case "R"://Reflector {neutCollChance}
+                for (Neut n : neuts) {
+                    if(Math.random()<s.u.temp[0]){
+                        System.out.println(n);
+                    }
+                }
                 break;
             case "M"://Moderator {neutCollChance, desiredSpeed, changeSpeed}
-                for (int i = 0; i < neuts; i++) {
+                for (Neut n : neuts) {
                     if(Math.random()<s.u.temp[0]){
-                        double speed = Math.sqrt(n.xv*n.xv+n.yv*n.yv);
+                        double speed = n.speed;
                         double diff = s.u.temp[1]-speed;
                         if(Math.signum(diff)>0) continue;
                         if(Math.abs(diff)<=s.u.temp[2]){
-                            n.xv/=speed;
-                            n.yv/=speed;
-                            n.xv*=s.u.temp[1];
-                            n.yv*=s.u.temp[1];
+                            Neut newNeut = new Neut(n);
+                            n.speed = s.u.temp[1];
+                            building.neutsToAdd.add(newNeut);
                         }else{
                             double deltaSpeed = s.u.temp[2] * Math.signum(diff);
-                            n.xv/=speed;
-                            n.yv/=speed;
-                            n.xv*=speed+deltaSpeed;
-                            n.yv*=speed+deltaSpeed;
+                            Neut newNeut = new Neut(n);
+                            n.speed = speed+deltaSpeed;
+                            building.neutsToAdd.add(newNeut);
                         }
                     }
                 }
@@ -87,6 +89,6 @@ public class UnitCode {
         double dir = Math.random()*Math.PI*2;
         double z = Math.random()*2-1;
         double z2 = Math.sqrt(1-z*z);
-        building.spawnNeut(s.x, s.y, s.z, (z2*Math.sin(dir)*s.u.temp[1]),(z2*Math.cos(dir)*s.u.temp[1]), z*s.u.temp[1],(int)s.u.temp[2]);
+        building.spawnNeut(s.x, s.y, s.z, (z2*Math.sin(dir)),(z2*Math.cos(dir)), z, s.u.temp[1], (int)s.u.temp[2]);
     }
 }
