@@ -144,7 +144,8 @@ public class ReactorRenderer extends JFrame{
         for (int i = 0; i < building.neuts.size(); i++) {
             Neut n = building.neuts.get(i);
             if((int)n.z!=z)continue;
-            bg.drawOval((int)((n.x-xoffset*building.reactor.length/100.0)*rectsize)+400-(int)(0.5/zoom*10),(int)((n.y-yoffset*building.reactor.length/100.0)*rectsize)+400-(int)(0.5/zoom*10),(int)(1/zoom*10),(int)(1/zoom*10));
+            bg.drawLine((int)((n.x-xoffset*building.reactor.length/100.0)*rectsize)+400,(int)((n.y-yoffset*building.reactor.length/100.0)*rectsize)+400,
+            (int)((n.x+n.xd*n.speed-xoffset*building.reactor.length/100.0)*rectsize)+400,(int)((n.y+n.yd*n.speed-yoffset*building.reactor.length/100.0)*rectsize)+400);
         }
         drawLines(bg,infoToDraw,40,80);
         g.drawImage(bi,0,0,null);

@@ -52,6 +52,7 @@ public class Building {
                 if(intersection){
                     if(Math.random()<=s.u.global[3]){
                         neutCounts.add(s.x, s.y, s.z, n);
+                        n.speed = i;
                         break;
                     }
                 };
@@ -107,6 +108,9 @@ public class Building {
     }
 
     public void frame(){
+        for (int i = 0; i < neuts.size(); i++) {
+            updateNeut(neuts.get(i));
+        }
         double t = System.nanoTime()/1000000.0;
         for (int x = 0; x < xsize; x++) {
             for (int y = 0; y < ysize; y++) {
@@ -127,27 +131,24 @@ public class Building {
                 }
             }
         }
-        for (int i = 0; i < neuts.size(); i++) {
-            updateNeut(neuts.get(i));
-        }
-        neuts.removeAll(neutsToRemove);
-        neuts.addAll(neutsToAdd);
-        neutsToRemove.clear();
-        neutsToAdd.clear();
-        updateNeutCounts();
         rr.strings.add(String.valueOf(money));
         rr.strings.add(String.valueOf(neuts.size()));
         rr.strings.add(String.valueOf((double)System.nanoTime()/1000000.0-t));
         rr.strings.add(String.valueOf(rodOverride));
         rr.paint(rr.g);
+        updateNeutCounts();
+        neuts.removeAll(neutsToRemove);
+        neuts.addAll(neutsToAdd);
+        neutsToRemove.clear();
+        neutsToAdd.clear();
     }
 
     UnitTemplate[] uts = {
-        new UnitTemplate("F", "U", new double[] {0.0005, 0.4, 1000, 0.1, 4, 20, 3}, Color.GREEN,new double[]{0,0.005,0.9999,0.0005,0.0}),
+        new UnitTemplate("F", "U", new double[] {0.1, 0.4, 1000, 0.1, 4, 20, 6}, Color.GREEN,new double[]{0,0.005,0.9999,0.0005,0.0}),
         new UnitTemplate("F", "P", new double[] {0.05, 0.4, 10000, 0.0, 4, 20, 3}, Color.MAGENTA,new double[]{0,0.005,0.9999,0.0005,0.0}),
         new UnitTemplate("R", "B", new double[] {1}, Color.GRAY,new double[]{1,0.005,0.9999,0.75,1.0}),
-        new UnitTemplate("M", "W", new double[] {0.5,0.03,0.02}, Color.CYAN,new double[]{0,0.005,0.9999,0.3,0.0}),
-        new UnitTemplate("C", "C", new double[] {0.5,0,0.25,4000,5000,0.001}, Color.ORANGE,new double[]{0,0.005,0.9999,0.1,0.2}),
+        new UnitTemplate("M", "W", new double[] {1,0.03,0.2}, Color.CYAN,new double[]{0,0.005,0.9999,0.3,0.0}),
+        new UnitTemplate("C", "C", new double[] {0.5,0,1.0,4000,5000,0.001}, Color.ORANGE,new double[]{0,0.005,0.9999,0.1,0.2}),
         new UnitTemplate("C", "L", new double[] {0.5,0,1.0,150,150,0.001}, Color.YELLOW,new double[]{0,0.005,0.9999,0.1,0.2}),
         new UnitTemplate("S", "S", new double[] {0,0,10,5,1000,1000}, Color.PINK,new double[]{1,0.005,0.9999,0.0005,0.0}),
         new UnitTemplate("N", "A", new double[] {}, Color.WHITE,new double[]{0,1.0,0.0}),
