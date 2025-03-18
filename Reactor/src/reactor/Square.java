@@ -32,5 +32,8 @@ public class Square {
         this.u = new Unit(nextSquare.u);
     }
 
-
+    @Override
+    public String toString(){
+        return "x: " + x + " y: " + y + " z: " + z + " u.type:" + u.type + " u.subtype:" + u.subtype;
+    }
 }

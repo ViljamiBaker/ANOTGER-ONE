@@ -48,10 +48,12 @@ public class Building {
         for (double i = 0; i < n.lifetime; i++) {
             if((getSquareAt(n.origin.add(n.dir.mult(i))).u.global[0]==1)){
                 Square s = getSquareAt(n.origin.add(n.dir.mult(i)));
+                System.out.println(s);
                 AABBIntersection intersection = n.rayAABBIntersection(s);
                 if(intersection.happened()){
                     if(Math.random()<=s.u.global[3]){
                         neutCounts.add(s.x, s.y, s.z, n);
+                        System.out.println(s);
                         break;
                     }
                 };
@@ -99,8 +101,6 @@ public class Building {
                     double heatLost = s.temperature*s.u.global[1];
                     for (int[] dir : dirs) {
                         Square s2 = getSquareAt(x+dir[0],y+dir[1],z+dir[2]);
-                        if(s.x==7&&s.y==7&&s.z==1){
-                        }
                         s2.nextSquare.temperature += heatLost*s2.u.global[2];
                         s.nextSquare.temperature -= heatLost*s2.u.global[2];
                     }
@@ -147,8 +147,8 @@ public class Building {
     }
 
     UnitTemplate[] uts = {
-        new UnitTemplate("F", "U", new double[] {0.1, 0.4, 1000, 0.1, 4, 20, 6}, Color.GREEN,new double[]{0,0.005,0.9999,0.0005}),
-        new UnitTemplate("F", "P", new double[] {0.05, 0.4, 10000, 0.0, 4, 20, 3}, Color.MAGENTA,new double[]{0,0.005,0.9999,0.0005}),
+        new UnitTemplate("F", "U", new double[] {0.1, 0.4, 10, 0.1, 4, 20, 6}, Color.GREEN,new double[]{0,0.005,0.9999,0.2}),
+        new UnitTemplate("F", "P", new double[] {0.05, 0.4, 10, 0.0, 4, 20, 3}, Color.MAGENTA,new double[]{0,0.005,0.9999,0.00205}),
         new UnitTemplate("R", "B", new double[] {1}, Color.GRAY,new double[]{1,0.005,0.9999,0.75}),
         new UnitTemplate("M", "W", new double[] {1,0.03,0.2}, Color.CYAN,new double[]{0,0.005,0.9999,0.3}),
         new UnitTemplate("C", "C", new double[] {0.5,0,1.0,4000,5000,0.001}, Color.ORANGE,new double[]{0,0.005,0.9999,0.1}),

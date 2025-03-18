@@ -1,11 +1,14 @@
 package reactor;
 
+import java.util.ArrayList;
+
 public class Neut {
     Point3 origin;
     Point3 dir;
     double speed;
     int lifetime;
-    AABBIntersection lastAABBIntersection = new AABBIntersection(false, 1, 1);
+    AABBIntersection lastAABBIntersection = new AABBIntersection(false, 1, 1, 1);
+    ArrayList<Square> ignoreList = new ArrayList<>();
     public Neut(Point3 origin, Point3 dir, double speed, int lifetime){
         this.origin = origin;
         this.dir = dir;
@@ -13,6 +16,7 @@ public class Neut {
     }
 
     public AABBIntersection rayAABBIntersection(Square s) {
+        if(ignoreList.contains(s)) return new AABBIntersection(false, 0, 0, 0);
         double tmin = Double.MAX_VALUE; 
         double tmax = -Double.MAX_VALUE;
         double[] boxpos = {s.x,s.y,s.z};
@@ -32,7 +36,7 @@ public class Neut {
         if((boxpos[1]+1 - pos[1]) * dirs[1] == tmin) face = 3;// -y
         if((boxpos[2] - pos[2]) * dirs[2] == tmin) face = 4;// z
         if((boxpos[2]+1 - pos[2]) * dirs[2] == tmin) face = 5;// -z
-        AABBIntersection aabbIntersection = new AABBIntersection(tmin < tmax, tmin, face);
+        AABBIntersection aabbIntersection = new AABBIntersection(tmin < tmax && tmin > 0.0, tmin, tmax, face);
         lastAABBIntersection = aabbIntersection;
         return aabbIntersection;
     }

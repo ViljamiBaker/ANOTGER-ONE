@@ -22,7 +22,7 @@ public class UnitCode {
                     if(Math.random()<s.u.temp[0]){
                         Neut n2 = null;
                         AABBIntersection aabbint = n.rayAABBIntersection(s);
-                        Point3 newpos = n.origin.add(n.dir.mult((n.lastAABBIntersection.t())));
+                        Point3 newpos = n.origin.add(n.dir.mult((n.lastAABBIntersection.tmin())));
                         switch (aabbint.face()) {
                             case 0:
                                 n2 = new Neut(newpos.add(new Point3(+ 0.01, 0, 0)), new Point3(-n.dir.x, n.dir.y, n.dir.z), n.speed, n.lifetime);
@@ -52,7 +52,7 @@ public class UnitCode {
                     if(Math.random()<s.u.temp[0]){
                         double speed = n.speed;
                         double diff = s.u.temp[1]-speed;
-                        Point3 newpos = n.origin.add(n.dir.mult((n.lastAABBIntersection.t())));
+                        Point3 newpos = n.origin.add(n.dir.mult((n.lastAABBIntersection.tmax())));
                         Neut newNeut = new Neut(n);
                         if(Math.signum(diff)>0) continue;
                         if(Math.abs(diff)<=s.u.temp[2]){
@@ -64,6 +64,9 @@ public class UnitCode {
                             newNeut.origin = newpos;
                         }
                         building.neutsToAdd.add(newNeut);
+                    }else{
+                        n.ignoreList.add(s);
+                        building.neutsToAdd.add(n);
                     }
                 }
                 break;
@@ -105,8 +108,8 @@ public class UnitCode {
     public static void spawnNeut(Square s){
         s.nextSquare.temperature+= s.u.temp[5];
         double dir = Math.random()*Math.PI*2;
-        double z = Math.random()*2-1;
-        double z2 = Math.sqrt(1-z*z);
+        double z = 0;//Math.random()*2-1;
+        double z2 = 1;//Math.sqrt(1-z*z);
         building.spawnNeut(s.x, s.y, s.z, (z2*Math.sin(dir)),(z2*Math.cos(dir)), z, s.u.temp[1], (int)s.u.temp[2]);
     }
 }
