@@ -20,48 +20,29 @@ public class UnitCode {
             case "R"://Reflector {neutCollChance}
                 for (Neut n : neuts) {
                     if(Math.random()<s.u.temp[0]){
-                        Neut n2 = new Neut(n);
-                        int face = n2.rayAABBIntersection(s);
-                        switch (face) {
+                        Neut n2 = null;
+                        AABBIntersection aabbint = n.rayAABBIntersection(s);
+                        Point3 newpos = n.origin.add(n.dir.mult((n.lastAABBIntersection.t())));
+                        switch (aabbint.face()) {
                             case 0:
-                                n2.xd = Math.abs(n2.xd);
-                                n2.x = s.x + 0.6;
-                                n2.y = s.y;
-                                n2.z = s.z;
+                                n2 = new Neut(newpos.add(new Point3(+ 0.01, 0, 0)), new Point3(-n.dir.x, n.dir.y, n.dir.z), n.speed, n.lifetime);
                                 break;
                             case 1:
-                                n2.xd = -Math.abs(n2.xd);
-                                n2.x = s.x - 0.6;
-                                n2.y = s.y;
-                                n2.z = s.z;
+                                n2 = new Neut(newpos.add(new Point3(- 0.01, 0, 0)), new Point3(-n.dir.x, n.dir.y, n.dir.z), n.speed, n.lifetime);
                                 break;
                             case 2:
-                                n2.yd = Math.abs(n2.yd);
-                                n2.x = s.x;
-                                n2.y = s.y + 0.6;
-                                n2.z = s.z;
+                                n2 = new Neut(newpos.add(new Point3(0, + 0.01, 0)),new Point3( n.dir.x, -n.dir.y, n.dir.z), n.speed, n.lifetime);
                                 break;
                             case 3:
-                                n2.yd = -Math.abs(n2.yd);
-                                n2.x = s.x;
-                                n2.y = s.y - 0.6;
-                                n2.z = s.z;
+                                n2 = new Neut(newpos.add(new Point3(0, - 0.01, 0)), new Point3(n.dir.x, -n.dir.y, n.dir.z), n.speed, n.lifetime);
                                 break;
                             case 4:
-                                n2.zd = Math.abs(n2.zd);
-                                n2.x = s.x;
-                                n2.y = s.y;
-                                n2.z = s.z + 0.6;  
+                                n2 = new Neut(newpos.add(new Point3(0, 0, + 0.01)), new Point3(n.dir.x, n.dir.y, -n.dir.z), n.speed, n.lifetime);
                                 break;
                             case 5:
-                                n2.zd = -Math.abs(n2.zd);
-                                n2.x = s.x;
-                                n2.y = s.y;
-                                n2.z = s.z - 0.6;
+                                n2 = new Neut(newpos.add(new Point3(0, 0, - 0.01)), new Point3(n.dir.x, n.dir.y, -n.dir.z), n.speed, n.lifetime);
                                 break;
                         }
-                        System.out.println(s.x);
-                        System.out.println(n2.x);
                         building.neutsToAdd.add(n2);
                     }
                 }
@@ -71,23 +52,18 @@ public class UnitCode {
                     if(Math.random()<s.u.temp[0]){
                         double speed = n.speed;
                         double diff = s.u.temp[1]-speed;
+                        Point3 newpos = n.origin.add(n.dir.mult((n.lastAABBIntersection.t())));
+                        Neut newNeut = new Neut(n);
                         if(Math.signum(diff)>0) continue;
                         if(Math.abs(diff)<=s.u.temp[2]){
-                            Neut newNeut = new Neut(n);
                             newNeut.speed = s.u.temp[1];
-                            newNeut.x = s.x;
-                            newNeut.y = s.y;
-                            newNeut.z = s.z;
-                            building.neutsToAdd.add(newNeut);
+                            newNeut.origin = newpos;
                         }else{
                             double deltaSpeed = s.u.temp[2] * Math.signum(diff);
-                            Neut newNeut = new Neut(n);
                             newNeut.speed = speed+deltaSpeed;
-                            newNeut.x = s.x;
-                            newNeut.y = s.y;
-                            newNeut.z = s.z;
-                            building.neutsToAdd.add(newNeut);
+                            newNeut.origin = newpos;
                         }
+                        building.neutsToAdd.add(newNeut);
                     }
                 }
                 break;
@@ -99,10 +75,10 @@ public class UnitCode {
                 }else{
                     desired = UtilVB.slopedLine(s.u.temp[1], s.u.temp[3], s.u.temp[2], s.u.temp[4], building.neuts.size());
                 }
-                if(desired<s.u.temp[0]){
-                    s.u.temp[0]-=s.u.temp[5];
-                }else if(desired>s.u.temp[0]){
-                    s.u.temp[0]+=s.u.temp[5];
+                if(desired<s.u.global[3]){
+                    s.u.global[3]-=s.u.temp[5];
+                }else if(desired>s.u.global[3]){
+                    s.u.global[3]+=s.u.temp[5];
                 }
                 break;
             case "S"://Steam column {water, steam, waterGainRate, steamSellRate, maxWater, maxSteam}

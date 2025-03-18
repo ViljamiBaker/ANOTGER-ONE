@@ -46,13 +46,12 @@ public class Building {
 
     public void updateNeut(Neut n){
         for (double i = 0; i < n.lifetime; i++) {
-            if((getSquareAt((int)(n.x+n.xd*i), (int)(n.y+n.yd*i), (int)(n.z+n.zd*i)).u.global[0]==1)){
-                Square s = getSquareAt((int)(n.x+n.xd*i), (int)(n.y+n.yd*i), (int)(n.z+n.zd*i));
-                boolean intersection = n.intersection(s);
-                if(intersection){
+            if((getSquareAt(n.origin.add(n.dir.mult(i))).u.global[0]==1)){
+                Square s = getSquareAt(n.origin.add(n.dir.mult(i)));
+                AABBIntersection intersection = n.rayAABBIntersection(s);
+                if(intersection.happened()){
                     if(Math.random()<=s.u.global[3]){
                         neutCounts.add(s.x, s.y, s.z, n);
-                        n.speed = i;
                         break;
                     }
                 };
@@ -68,6 +67,10 @@ public class Building {
         return reactor[x][y][z];
     }
 
+    public Square getSquareAt(Point3 p){
+        return getSquareAt((int)p.x,(int)p.y,(int)p.z);
+    }
+
     public Neut[] getNeutCountAt(int x, int y, int z){
         if(x<0||x>=xsize||y<0||y>=ysize||z<0||z>=zsize){
             return new Neut[0];
@@ -80,7 +83,7 @@ public class Building {
     }
 
     public void spawnNeut(int x, int y, int z, double xv, double yv, double zv, double speed, int lifetime){
-        neutsToAdd.add(new Neut(x+0.5, y+0.5, z+0.5, xv, yv, zv, speed, lifetime));
+        neutsToAdd.add(new Neut(new Point3(x+0.5, y+0.5, z+0.5), new Point3(xv, yv, zv), speed, lifetime));
     }
 
     int[][] dirs = {
@@ -144,13 +147,13 @@ public class Building {
     }
 
     UnitTemplate[] uts = {
-        new UnitTemplate("F", "U", new double[] {0.1, 0.4, 1000, 0.1, 4, 20, 6}, Color.GREEN,new double[]{0,0.005,0.9999,0.0005,0.0}),
-        new UnitTemplate("F", "P", new double[] {0.05, 0.4, 10000, 0.0, 4, 20, 3}, Color.MAGENTA,new double[]{0,0.005,0.9999,0.0005,0.0}),
-        new UnitTemplate("R", "B", new double[] {1}, Color.GRAY,new double[]{1,0.005,0.9999,0.75,1.0}),
-        new UnitTemplate("M", "W", new double[] {1,0.03,0.2}, Color.CYAN,new double[]{0,0.005,0.9999,0.3,0.0}),
-        new UnitTemplate("C", "C", new double[] {0.5,0,1.0,4000,5000,0.001}, Color.ORANGE,new double[]{0,0.005,0.9999,0.1,0.2}),
-        new UnitTemplate("C", "L", new double[] {0.5,0,1.0,150,150,0.001}, Color.YELLOW,new double[]{0,0.005,0.9999,0.1,0.2}),
-        new UnitTemplate("S", "S", new double[] {0,0,10,5,1000,1000}, Color.PINK,new double[]{1,0.005,0.9999,0.0005,0.0}),
+        new UnitTemplate("F", "U", new double[] {0.1, 0.4, 1000, 0.1, 4, 20, 6}, Color.GREEN,new double[]{0,0.005,0.9999,0.0005}),
+        new UnitTemplate("F", "P", new double[] {0.05, 0.4, 10000, 0.0, 4, 20, 3}, Color.MAGENTA,new double[]{0,0.005,0.9999,0.0005}),
+        new UnitTemplate("R", "B", new double[] {1}, Color.GRAY,new double[]{1,0.005,0.9999,0.75}),
+        new UnitTemplate("M", "W", new double[] {1,0.03,0.2}, Color.CYAN,new double[]{0,0.005,0.9999,0.3}),
+        new UnitTemplate("C", "C", new double[] {0.5,0,1.0,4000,5000,0.001}, Color.ORANGE,new double[]{0,0.005,0.9999,0.1}),
+        new UnitTemplate("C", "L", new double[] {0.5,0,1.0,150,150,0.001}, Color.YELLOW,new double[]{0,0.005,0.9999,0.1}),
+        new UnitTemplate("S", "S", new double[] {0,0,10,5,1000,1000}, Color.PINK,new double[]{1,0.005,0.9999,0.0005}),
         new UnitTemplate("N", "A", new double[] {}, Color.WHITE,new double[]{0,1.0,0.0}),
     };
 
