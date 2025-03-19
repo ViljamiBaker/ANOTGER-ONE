@@ -46,14 +46,13 @@ public class Building {
 
     public void updateNeut(Neut n){
         for (double i = 0; i < n.lifetime; i++) {
-            if((getSquareAt(n.origin.add(n.dir.mult(i))).u.global[0]==1)){
+            if((getSquareAt(n.origin.add(n.dir.mult(i))).u.global.get("Solid")==1)){
                 Square s = getSquareAt(n.origin.add(n.dir.mult(i)));
-                System.out.println(s);
                 AABBIntersection intersection = n.rayAABBIntersection(s);
                 if(intersection.happened()){
-                    if(Math.random()<=s.u.global[3]){
+                    if(Math.random()<=s.u.global.get("NeutCollChance")){
                         neutCounts.add(s.x, s.y, s.z, n);
-                        System.out.println(s);
+                        System.out.println(intersection);
                         break;
                     }
                 };
@@ -98,13 +97,13 @@ public class Building {
             for (int y = 0; y < ysize; y++) {
                 for (int z = 0; z < zsize; z++) {
                     Square s = reactor[x][y][z];
-                    double heatLost = s.temperature*s.u.global[1];
+                    double heatLost = s.temperature*s.u.global.get("HeatTransferRate");
                     for (int[] dir : dirs) {
                         Square s2 = getSquareAt(x+dir[0],y+dir[1],z+dir[2]);
-                        s2.nextSquare.temperature += heatLost*s2.u.global[2];
-                        s.nextSquare.temperature -= heatLost*s2.u.global[2];
+                        s2.nextSquare.temperature += heatLost*s2.u.global.get("HeatLossRate");
+                        s.nextSquare.temperature -= heatLost*s2.u.global.get("HeatLossRate");
                     }
-                    s.nextSquare.temperature *= s.u.global[2];
+                    s.nextSquare.temperature *= s.u.global.get("HeatLossRate");
                 }
             }
         }
@@ -147,111 +146,105 @@ public class Building {
     }
 
     UnitTemplate[] uts = {
-        new UnitTemplate("F", "U", new double[] {0.1, 0.4, 10, 0.1, 4, 20, 6}, Color.GREEN,new double[]{0,0.005,0.9999,0.2}),
-        new UnitTemplate("F", "P", new double[] {0.05, 0.4, 10, 0.0, 4, 20, 3}, Color.MAGENTA,new double[]{0,0.005,0.9999,0.00205}),
-        new UnitTemplate("R", "B", new double[] {1}, Color.GRAY,new double[]{1,0.005,0.9999,0.75}),
-        new UnitTemplate("M", "W", new double[] {1,0.03,0.2}, Color.CYAN,new double[]{0,0.005,0.9999,0.3}),
-        new UnitTemplate("C", "C", new double[] {0.5,0,1.0,4000,5000,0.001}, Color.ORANGE,new double[]{0,0.005,0.9999,0.1}),
-        new UnitTemplate("C", "L", new double[] {0.5,0,1.0,150,150,0.001}, Color.YELLOW,new double[]{0,0.005,0.9999,0.1}),
-        new UnitTemplate("S", "S", new double[] {0,0,10,5,1000,1000}, Color.PINK,new double[]{1,0.005,0.9999,0.0005}),
-        new UnitTemplate("N", "A", new double[] {}, Color.WHITE,new double[]{0,1.0,0.0}),
+        new UnitTemplate("F", "U", Color.GREEN, 
+            new KeyValueList(new String[] {"randomNeutChance", "neutspeed", "neutlifetime", "neutCollSpawnChance", "neutSpeedExponent", "fissionHeat", "neutSpawnCount"}, 
+                new double[] {0.1, 0.4, 10, 0.1, 4, 20, 6}),
+            new KeyValueList(new String[] {"Solid", "NeutCollChance", "HeatTransferRate", "HeatLossRate"}, 
+                new double[]{0,1.0,0.005,0.9999})
+        ),
+        new UnitTemplate("F", "P", Color.MAGENTA, 
+            new KeyValueList(new String[] {"randomNeutChance", "neutspeed", "neutlifetime", "neutCollSpawnChance", "neutSpeedExponent", "fissionHeat", "neutSpawnCount"}, 
+                new double[] {0.05, 0.4, 10, 0.0, 4, 20, 3}),
+            new KeyValueList(new String[] {"Solid", "NeutCollChance", "HeatTransferRate", "HeatLossRate"}, 
+                new double[]{0,1.0,0.005,0.9999})
+        ),
+        new UnitTemplate("F", "J", Color.MAGENTA, 
+            new KeyValueList(new String[] {"randomNeutChance", "neutspeed", "neutlifetime", "neutCollSpawnChance", "neutSpeedExponent", "fissionHeat", "neutSpawnCount"}, 
+                new double[] {0.1, 0.4, 10, 0.1, 4, 20, 6}),
+            new KeyValueList(new String[] {"Solid", "NeutCollChance", "HeatTransferRate", "HeatLossRate"}, 
+                new double[]{0,1.0,0.005,0.9999})
+        ),
+        new UnitTemplate("R", "B", Color.GRAY, 
+            new KeyValueList(new String[] {}, 
+                new double[] {}),
+            new KeyValueList(new String[] {"Solid", "NeutCollChance", "HeatTransferRate", "HeatLossRate"}, 
+                new double[]{1,1.0,0.005,0.9999})
+        ),
+        new UnitTemplate("M", "W", Color.CYAN, 
+            new KeyValueList(new String[] {"desiredSpeed", "changeSpeed"}, 
+                new double[] {0.03,0.2}),
+            new KeyValueList(new String[] {"Solid", "NeutCollChance", "HeatTransferRate", "HeatLossRate"}, 
+                new double[]{0,1.0,0.005,0.9999})
+        ),
+        new UnitTemplate("C", "C", Color.ORANGE, 
+            new KeyValueList(new String[] {"minInsertion", "maxInsertion", "minNeuts", "maxNeuts", "speed"}, 
+                new double[] {0,1.0,4000,5000,0.001}),
+            new KeyValueList(new String[] {"Solid", "NeutCollChance", "HeatTransferRate", "HeatLossRate"}, 
+                new double[]{0,1.0,0.005,0.9999})
+        ),
+        new UnitTemplate("C", "L", Color.YELLOW, 
+            new KeyValueList(new String[] {"minInsertion", "maxInsertion", "minNeuts", "maxNeuts", "speed"}, 
+                new double[] {0,1.0,150,150,0.001}),
+            new KeyValueList(new String[] {"Solid", "NeutCollChance", "HeatTransferRate", "HeatLossRate"}, 
+                new double[]{0,1.0,0.005,0.9999})
+        ),
+        new UnitTemplate("S", "S", Color.PINK, 
+            new KeyValueList(new String[] {"water", "steam", "waterGainRate", "steamSellRate", "maxWater", "maxSteam"},
+                new double[] {0,0,10,5,1000,1000}),
+            new KeyValueList(new String[] {"Solid", "NeutCollChance", "HeatTransferRate", "HeatLossRate"}, 
+                new double[]{1,0.0005,0.005,0.9999})
+        ),
+        new UnitTemplate("N", "A", Color.WHITE, 
+            new KeyValueList(new String[] {}, 
+                new double[] {}),
+            new KeyValueList(new String[] {"Solid", "NeutCollChance", "HeatTransferRate", "HeatLossRate"}, 
+                new double[]{0,0.0,1.0,0.0})
+        ),
     };
 
     public static void main(String[] args) {
         Building b = new Building(new String[][][]
-        {
             {
-                {"B","B","B","B","B","B","B","B","B","B","B"},
-                {"B","B","B","B","B","B","B","B","B","B","B"},
-                {"B","B","B","B","B","B","B","B","B","B","B"},
-                {"B","B","B","B","B","B","B","B","B","B","B"},
-                {"B","B","B","B","B","B","B","B","B","B","B"},
-                {"B","B","B","B","B","B","B","B","B","B","B"},
-                {"B","B","B","B","B","B","B","B","B","B","B"},
-                {"B","B","B","B","B","B","B","B","B","B","B"},
-                {"B","B","B","B","B","B","B","B","B","B","B"},
-                {"B","B","B","B","B","B","B","B","B","B","B"},
-                {"B","B","B","B","B","B","B","B","B","B","B"},
-            },
-            {
-                {"B","B","B","B","B","B","B","B","B","B","B"},
-                {"B","U","C","W","C","U","C","W","C","U","B"},
-                {"B","C","B","C","B","C","B","C","B","C","B"},
-                {"B","W","C","U","C","W","C","U","C","W","B"},
-                {"B","C","B","C","B","L","B","C","B","C","B"},
-                {"B","U","C","W","L","P","L","W","C","U","B"},
-                {"B","C","B","C","B","L","B","C","B","C","B"},
-                {"B","W","C","U","C","W","C","U","C","W","B"},
-                {"B","C","B","C","B","C","B","C","B","C","B"},
-                {"B","U","C","W","C","U","C","W","C","U","B"},
-                {"B","B","B","B","B","B","B","B","B","B","B"},
-            },
-            {
-                {"B","B","B","B","B","B","B","B","B","B","B"},
-                {"B","C","B","C","B","C","B","C","B","C","B"},
-                {"B","B","C","B","C","B","C","B","C","B","B"},
-                {"B","C","B","C","B","C","B","C","B","C","B"},
-                {"B","B","C","B","C","B","C","B","C","B","B"},
-                {"B","C","B","C","B","C","B","C","B","C","B"},
-                {"B","B","C","B","C","B","C","B","C","B","B"},
-                {"B","C","B","C","B","C","B","C","B","C","B"},
-                {"B","B","C","B","C","B","C","B","C","B","B"},
-                {"B","C","B","C","B","C","B","C","B","C","B"},
-                {"B","B","B","B","B","B","B","B","B","B","B"},
-            },
-            {
-                {"B","B","B","B","B","B","B","B","B","B","B"},
-                {"B","W","C","U","C","W","C","U","C","W","B"},
-                {"B","C","B","C","B","C","B","C","B","C","B"},
-                {"B","U","C","W","C","U","C","W","C","U","B"},
-                {"B","C","B","C","B","L","B","C","B","C","B"},
-                {"B","W","C","U","L","P","L","U","C","W","B"},
-                {"B","C","B","C","B","L","B","C","B","C","B"},
-                {"B","U","C","W","C","U","C","W","C","U","B"},
-                {"B","C","B","C","B","C","B","C","B","C","B"},
-                {"B","W","C","U","C","W","C","U","C","W","B"},
-                {"B","B","B","B","B","B","B","B","B","B","B"},
-            },
-            {
-                {"B","B","B","B","B","B","B","B","B","B","B"},
-                {"B","C","B","C","B","C","B","C","B","C","B"},
-                {"B","B","C","B","C","B","C","B","C","B","B"},
-                {"B","C","B","C","B","C","B","C","B","C","B"},
-                {"B","B","C","B","C","B","C","B","C","B","B"},
-                {"B","C","B","C","B","C","B","C","B","C","B"},
-                {"B","B","C","B","C","B","C","B","C","B","B"},
-                {"B","C","B","C","B","C","B","C","B","C","B"},
-                {"B","B","C","B","C","B","C","B","C","B","B"},
-                {"B","C","B","C","B","C","B","C","B","C","B"},
-                {"B","B","B","B","B","B","B","B","B","B","B"},
-            },
-            {
-                {"B","B","B","B","B","B","B","B","B","B","B"},
-                {"B","U","C","W","C","U","C","W","C","U","B"},
-                {"B","C","B","C","B","C","B","C","B","C","B"},
-                {"B","W","C","U","C","W","C","U","C","W","B"},
-                {"B","C","B","C","B","L","B","C","B","C","B"},
-                {"B","U","C","W","L","P","L","W","C","U","B"},
-                {"B","C","B","C","B","L","B","C","B","C","B"},
-                {"B","W","C","U","C","W","C","U","C","W","B"},
-                {"B","C","B","C","B","C","B","C","B","C","B"},
-                {"B","U","C","W","C","U","C","W","C","U","B"},
-                {"B","B","B","B","B","B","B","B","B","B","B"},
-            },
-            {
-                {"B","B","B","B","B","B","B","B","B","B","B"},
-                {"B","B","B","B","B","B","B","B","B","B","B"},
-                {"B","B","B","B","B","B","B","B","B","B","B"},
-                {"B","B","B","B","B","B","B","B","B","B","B"},
-                {"B","B","B","B","B","B","B","B","B","B","B"},
-                {"B","B","B","B","B","B","B","B","B","B","B"},
-                {"B","B","B","B","B","B","B","B","B","B","B"},
-                {"B","B","B","B","B","B","B","B","B","B","B"},
-                {"B","B","B","B","B","B","B","B","B","B","B"},
-                {"B","B","B","B","B","B","B","B","B","B","B"},
-                {"B","B","B","B","B","B","B","B","B","B","B"},
+                {
+                    {"B","B","B","B","B","B","B","B","B","B","B"},
+                    {"B","B","B","B","B","B","B","B","B","B","B"},
+                    {"B","B","B","B","B","B","B","B","B","B","B"},
+                    {"B","B","B","B","B","B","B","B","B","B","B"},
+                    {"B","B","B","B","B","B","B","B","B","B","B"},
+                    {"B","B","B","B","B","B","B","B","B","B","B"},
+                    {"B","B","B","B","B","B","B","B","B","B","B"},
+                    {"B","B","B","B","B","B","B","B","B","B","B"},
+                    {"B","B","B","B","B","B","B","B","B","B","B"},
+                    {"B","B","B","B","B","B","B","B","B","B","B"},
+                    {"B","B","B","B","B","B","B","B","B","B","B"},
+                },
+                {
+                    {"B","B","B","B","B","B","B","B","B","B","B"},
+                    {"B","A","A","A","A","A","A","A","A","A","B"},
+                    {"B","A","A","A","A","A","A","A","A","A","B"},
+                    {"B","A","A","A","A","A","A","A","A","A","B"},
+                    {"B","A","A","A","A","A","A","A","A","A","B"},
+                    {"B","J","A","A","A","A","A","A","A","A","B"},
+                    {"B","A","A","A","A","A","A","A","A","A","B"},
+                    {"B","A","A","A","A","A","A","A","A","A","B"},
+                    {"B","A","A","A","A","A","A","A","A","A","B"},
+                    {"B","A","A","A","A","A","A","A","A","A","B"},
+                    {"B","B","B","B","B","B","B","B","B","B","B"},
+                },
+                {
+                    {"B","B","B","B","B","B","B","B","B","B","B"},
+                    {"B","B","B","B","B","B","B","B","B","B","B"},
+                    {"B","B","B","B","B","B","B","B","B","B","B"},
+                    {"B","B","B","B","B","B","B","B","B","B","B"},
+                    {"B","B","B","B","B","B","B","B","B","B","B"},
+                    {"B","B","B","B","B","B","B","B","B","B","B"},
+                    {"B","B","B","B","B","B","B","B","B","B","B"},
+                    {"B","B","B","B","B","B","B","B","B","B","B"},
+                    {"B","B","B","B","B","B","B","B","B","B","B"},
+                    {"B","B","B","B","B","B","B","B","B","B","B"},
+                    {"B","B","B","B","B","B","B","B","B","B","B"},
+                }
             }
-        }
         );
         while (true) {
             double t = System.nanoTime()/1000000.0;

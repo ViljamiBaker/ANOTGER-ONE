@@ -5,9 +5,9 @@ import java.awt.Color;
 public class Unit {
     String type;
     String subtype;
-    double[] temp;
+    KeyValueList temp;
     Color color;
-    double[] global;
+    KeyValueList global;
     public Unit(UnitTemplate ut){
         this.type = ut.type();// what code to run
         this.subtype = ut.subtype();// what to display

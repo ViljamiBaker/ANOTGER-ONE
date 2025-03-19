@@ -117,13 +117,13 @@ public class ReactorRenderer extends JFrame{
         strings.add(String.valueOf(s.x) + ", "+ String.valueOf(s.y) + ", "+ String.valueOf(s.z));
         strings.add(String.valueOf(s.temperature));
         strings.add("temp:");
-        for (int i = 0; i < s.u.temp.length+s.u.global.length+1; i++) {
-            if(i<s.u.temp.length){
-                strings.add(String.valueOf(s.u.temp[i]));
-            }else if(i==s.u.temp.length){
+        for (int i = 0; i < s.u.temp.getSize()+s.u.global.getSize()+1; i++) {
+            if(i<s.u.temp.getSize()){
+                strings.add(String.valueOf(s.u.temp.get(i)));
+            }else if(i==s.u.temp.getSize()){
                 strings.add("global:");
             }else{
-                strings.add(String.valueOf(s.u.global[i-s.u.temp.length-1]));
+                strings.add(String.valueOf(s.u.global.get(i-s.u.temp.getSize()-1)));
             }
         }
         infoToDraw = strings.toArray(new String[0]);

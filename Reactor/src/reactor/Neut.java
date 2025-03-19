@@ -17,28 +17,42 @@ public class Neut {
 
     public AABBIntersection rayAABBIntersection(Square s) {
         if(ignoreList.contains(s)) return new AABBIntersection(false, 0, 0, 0);
-        double tmin = Double.MAX_VALUE; 
-        double tmax = -Double.MAX_VALUE;
-        double[] boxpos = {s.x,s.y,s.z};
-        double[] pos = {origin.x,origin.y,origin.z};
-        double[] dirs = {dir.x,dir.y,dir.z};
-        int face = -1;
-        for (int d = 0; d < 3; ++d) {
-            double t1 = (boxpos[d] - pos[d]) * dirs[d];
-            double t2 = (boxpos[d]+1 - pos[d]) * dirs[d];
+        double tEnter = Double.NEGATIVE_INFINITY;
+        double tExit = Double.POSITIVE_INFINITY;
     
-            tmin = Math.min(tmin, Math.min(t1, t2));
-            tmax = Math.max(tmax, Math.max(t1, t2));
+        // Check intersection with each pair of slabs
+        for (int i = 0; i < 3; i++) {
+            double axisOrigin = (i == 0) ? origin.x : (i == 1) ? origin.y : origin.z;
+            double axisDirection = (i == 0) ? dir.x : (i == 1) ? dir.y : dir.z;
+            double aabbMin = (i == 0) ? s.x : (i == 1) ? s.y : s.z;
+            double aabbMax = (i == 0) ? s.x + 1 : (i == 1) ? s.y + 1 : s.z + 1;
+    
+            if (axisDirection == 0) {
+                // Ray is parallel to the slab, check if it's inside
+                if (axisOrigin < aabbMin || axisOrigin > aabbMax) {
+                    return false;
+                }
+            } else {
+                double t1 = (aabbMin - axisOrigin) / axisDirection;
+                double t2 = (aabbMax - axisOrigin) / axisDirection;
+    
+                if (t1 > t2) {
+                    // Swap t1 and t2 to ensure t1 is the entry point
+                    double temp = t1;
+                    t1 = t2;
+                    t2 = temp;
+                }
+    
+                tEnter = Math.max(tEnter, t1);
+                tExit = Math.min(tExit, t2);
+    
+                if (tEnter > tExit) {
+                    return false; // No overlap, ray misses the AABB
+                }
+            }
         }
-        if((boxpos[0] - pos[0]) * dirs[0] == tmin) face = 0;// x
-        if((boxpos[0]+1 - pos[0]) * dirs[0] == tmin) face = 1;// -x
-        if((boxpos[1] - pos[1]) * dirs[1] == tmin) face = 2;// y
-        if((boxpos[1]+1 - pos[1]) * dirs[1] == tmin) face = 3;// -y
-        if((boxpos[2] - pos[2]) * dirs[2] == tmin) face = 4;// z
-        if((boxpos[2]+1 - pos[2]) * dirs[2] == tmin) face = 5;// -z
-        AABBIntersection aabbIntersection = new AABBIntersection(tmin < tmax && tmin > 0.0, tmin, tmax, face);
-        lastAABBIntersection = aabbIntersection;
-        return aabbIntersection;
+    
+        return tEnter >= 0; // Ray intersects the AABB
     }
 
     public Neut(Neut n){
